@@ -544,8 +544,8 @@
     };
 
     document.getElementById('closeStats').onclick').onclick = () => { StatsManager.updateUI(); document.getElementById('statsModal').classList.add('show'); };
-    document.getElementById('closeStats').onclick = () => document.getElementById('statsModal').classList.remove('show');
-
+     document.getElementById('statsBtn').onclick = () => { StatsManager.updateUI(); document.getElementById('statsModal').classList.add('show'); };
+ document.getElementById('closeStats').onclick = () => document.getElementById('statsModal').classList.remove('show');
     // Audio Events
     audio.ontimeupdate = () => {
         if(!audio.duration) return;
@@ -553,7 +553,9 @@
         document.getElementById('progressSlider').value = pct;
         document.documentElement.style.setProperty('--progress-width', pct+'%');
         document.getElementById('currentTime').innerText = fmtTime(audio.currentTime);
-lyricsBtn        BackgroundManager.updateAnimation(audio.currentTime, audio.duration);
+ document.getElementById('totalTime').innerText = fmtTime(audio.duration);
+ document.getElementById('lyricsBtn').onclick = () => { document.body.classList.toggle('lyrics-active'); };
+ BackgroundManager.updateAnimation(audio.currentTime, audio.duration);
     };
     
     audio.onended = () => { if(!isLoop) changeTrack(1); };
@@ -569,8 +571,7 @@ lyricsBtn        BackgroundManager.updateAnimation(audio.currentTime, audio.dura
         tracks.forEach((t, i) => {
             const d = document.createElement('div'); d.className = `track ${i===currentIndex?'active':''}`;
             d.innerHTML = `<div>${t.index}. ${t.title}</div><small>${t.saga}</small>`;
-audio.ontimeupdate
-    g.appendChild(d);
+ g.appendChild(d);     d.onclick = () => { loadTrack(i); setTimeout(togglePlay, 100); };
         });
     }
 
