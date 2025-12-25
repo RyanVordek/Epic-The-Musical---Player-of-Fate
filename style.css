@@ -356,5 +356,48 @@ body.lyrics-active .lyrics-panel {
     color: var(--accent);
     font-weight: bold;
     text-transform: uppercase;
+
+  /* ===== MOBILE FIRST APPROACH ===== */
+@media (max-width: 640px) {
+  .main-container { padding: 10px; padding-bottom: 40px; }
+  .hero { grid-template-columns: 1fr; gap: 20px; padding: 15px 10px; margin: 20px 0; }
+  .vinyl-disk { width: 200px !important; height: 200px !important; }
+  .player-scene { width: 240px !important; height: 240px !important; }
+  .vinyl-label { width: 70px !important; height: 70px !important; }
+  .character-popup { height: 180px !important; bottom: -20px !important; right: -40px !important; }
+  .nowplaying { padding: 15px; }
+  .np-title { font-size: 1.1rem; }
+  .tracks-grid { grid-template-columns: 1fr; }
+  .btn.icon-btn { width: 40px; height: 40px; }
+  .btn.primary { width: 60px; height: 60px; }
+  .intro-card { padding: 30px 20px; }
+  .intro h1 { font-size: clamp(2rem, 6vw, 3rem); }
+}
+
+  @media (min-width: 641px) and (max-width: 950px) {
+  .vinyl-disk { width: 280px !important; height: 280px !important; }
+  .player-scene { width: 320px !important; height: 320px !important; }
+  .tracks-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+  @media (max-height: 500px) and (orientation: landscape) {
+  .vinyl-disk { width: 180px !important; height: 180px !important; }
+  .player-scene { width: 220px !important; height: 220px !important; }
+  .character-popup { display: none; }
+}
+
+  @media (max-width: 768px) {
+  .btn.icon-btn { min-width: 44px; min-height: 44px; }
+  #progressSlider, #volumeSlider { height: 8px; }
+  #progressSlider::-webkit-slider-thumb { width: 18px; height: 18px; }
+}
+
+  @supports (padding: max(0px)) {
+  body { padding-left: max(0px, env(safe-area-inset-left)); padding-right: max(0px, env(safe-area-inset-right)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.reduce-motion * { animation: none !important; transition: none !important; }
+}
     letter-spacing: 1px;
 }
