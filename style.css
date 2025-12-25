@@ -1,16 +1,12 @@
 /* === VARIÁVEIS E RESET === */
 :root {
   --bg-base: #1a0b08;
-  --accent: #d97706; /* Laranja Padrão - será alterado via JS */
+  --accent: #d97706; 
   --text: #fff7ed;
   --muted: #a8a29e;
-  
-  /* Vidro e Bordas */
   --glass: rgba(20, 10, 5, 0.7);
   --stroke: rgba(255, 255, 255, 0.15);
   --radius: 24px;
-  
-  /* Progresso (Controlado via JS) */
   --progress-width: 0%;
 }
 
@@ -25,347 +21,151 @@ body {
   transition: background 1s ease;
 }
 
-/* === FUNDOS E CAMADAS (SAGA SYSTEM) === */
-#sagaBackground {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -2; /* Atrás de tudo */
-    pointer-events: none; /* Garante que não bloqueie cliques */
-    overflow: hidden;
-}
+/* === FUNDOS === */
+#sagaBackground { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; overflow: hidden; }
+#waterCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: transparent; transition: opacity 1s ease; opacity: 0.6; pointer-events: none; display: none; }
 
-#waterCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1; 
-    background: transparent;
-    transition: opacity 1s ease;
-    opacity: 0.6; 
-    pointer-events: none;
-    display: none; 
-}
+/* EFEITOS VISUAIS (Sagas) */
+#saga-cyclops { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #2a0505 0%, #000 70%); animation: fadeInRed 2s ease; z-index: 1; }
+.eye-container { position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; }
+.eye-shape { width: 0; height: 0; background: #000; border-radius: 50%; position: relative; box-shadow: 0 0 60px rgba(255, 0, 0, 0.2); animation: openEye 3s cubic-bezier(0.25, 1, 0.5, 1) forwards; overflow: hidden; border: 2px solid rgba(139, 0, 0, 0.5); }
+.eye-iris { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; height: 60%; background: radial-gradient(circle, #ff4444 0%, #8b0000 70%, #000 100%); border-radius: 50%; box-shadow: inset 0 0 20px #000; }
+.eye-pupil { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%; height: 100%; background: #000; border-radius: 50%; box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+.eye-glow { position: absolute; inset: -50px; background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%); animation: pulseRed 3s infinite alternate; z-index: -1; }
 
-/* === SAGA CYCLOPS: O OLHO === */
-#saga-cyclops {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle, #2a0505 0%, #000 70%);
-    animation: fadeInRed 2s ease;
-    z-index: 1;
-}
+#saga-underworld { position: absolute; inset: 0; overflow: hidden; background: #050505; z-index: 1; }
+.styx-scene { position: absolute; width: 100%; height: 100%; perspective: 800px; overflow: hidden; }
+.styx-river { position: absolute; left: -50%; width: 200%; height: 200%; top: 50%; background: repeating-linear-gradient(180deg, #0a0a1a 0%, #11112b 20%, #050510 40%); transform-origin: 50% 0; transform: rotateX(70deg) translateY(-50px); box-shadow: inset 0 0 100px #000; animation: riverFlow 10s linear infinite; opacity: 0.6; }
+#underworldCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
 
-.eye-container {
-    position: relative; width: 300px; height: 300px;
-    display: flex; align-items: center; justify-content: center;
-}
+.constellation-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; opacity: 0.4; filter: drop-shadow(0 0 10px gold); z-index: 1; }
+.constellation-path { fill: none; stroke: gold; stroke-width: 2; stroke-linecap: round; }
+.star-point { fill: white; filter: blur(1px); animation: twinkle 3s infinite ease-in-out; }
 
-.eye-shape {
-    width: 0; height: 0; 
-    background: #000;
-    border-radius: 50%;
-    position: relative;
-    box-shadow: 0 0 60px rgba(255, 0, 0, 0.2);
-    animation: openEye 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    overflow: hidden;
-    border: 2px solid rgba(139, 0, 0, 0.5);
-}
+/* === PLAYER LAYOUT === */
+.main-container { position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; padding-bottom: 120px; animation: fadeIn 1s ease; }
+.glass { background: var(--glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--stroke); border-radius: var(--radius); }
 
-.eye-iris {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60%; height: 60%;
-    background: radial-gradient(circle, #ff4444 0%, #8b0000 70%, #000 100%);
-    border-radius: 50%;
-    box-shadow: inset 0 0 20px #000;
-}
-
-.eye-pupil {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30%; height: 100%; 
-    background: #000;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-}
-
-.eye-glow {
-    position: absolute; inset: -50px;
-    background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
-    animation: pulseRed 3s infinite alternate;
-    z-index: -1;
-}
-
-/* === SAGA UNDERWORLD: O RIO ESTIGE === */
-#saga-underworld {
-    position: absolute; inset: 0; overflow: hidden;
-    background: #050505;
-    z-index: 1;
-}
-
-.styx-scene {
-    position: absolute; width: 100%; height: 100%;
-    perspective: 800px;
-    overflow: hidden;
-}
-
-.styx-river {
-    position: absolute;
-    left: -50%; width: 200%; height: 200%;
-    top: 50%;
-    background: repeating-linear-gradient(
-        180deg,
-        #0a0a1a 0%,
-        #11112b 20%,
-        #050510 40%
-    );
-    transform-origin: 50% 0;
-    transform: rotateX(70deg) translateY(-50px);
-    box-shadow: inset 0 0 100px #000;
-    animation: riverFlow 10s linear infinite;
-    opacity: 0.6;
-}
-
-#underworldCanvas {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 2; pointer-events: none;
-}
-
-/* === TROY (CONSTELAÇÃO) === */
-.constellation-svg {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%; height: 80%;
-    opacity: 0.4;
-    filter: drop-shadow(0 0 10px gold);
-    z-index: 1;
-}
-
-.constellation-path {
-    fill: none; stroke: gold; stroke-width: 2; stroke-linecap: round;
-}
-
-.star-point {
-    fill: white; filter: blur(1px);
-    animation: twinkle 3s infinite ease-in-out;
-}
-
-/* === LAYOUT E COMPONENTES === */
-.main-container { 
-    position: relative; 
-    z-index: 10; 
-    max-width: 1200px; 
-    margin: 0 auto; 
-    padding-bottom: 120px; 
-    animation: fadeIn 1s ease; 
-}
-
-/* Utilitário Glass */
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(24px); 
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-}
-
-/* === PLAYER HERO SECTION === */
-.hero { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 60px; 
-    padding: 40px; 
-    margin: 40px 20px; 
-    align-items: center; 
-}
-
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; padding: 40px; margin: 40px 20px; align-items: center; }
 .hero-text { color: #fff; width: 100%; }
 
-.nowplaying { 
-    padding: 30px; 
-    margin-top: 30px; 
-    border-radius: 20px; 
-    background: rgba(0,0,0,0.3); 
-    border: 1px solid rgba(255,255,255,0.05); 
-}
-
+.nowplaying { padding: 30px; margin-top: 30px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
 .np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .np-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
 .saga-badge { background: var(--accent); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
 
-/* TIMELINE */
 .timeline-container { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; }
-
-#progressSlider { 
-    flex: 1; height: 6px; 
-    appearance: none; 
-    background: rgba(255,255,255,0.1); 
-    border-radius: 3px; 
-    cursor: pointer; 
-    background-image: linear-gradient(to right, var(--accent) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); 
-    background-repeat: no-repeat;
-}
+#progressSlider { flex: 1; height: 6px; appearance: none; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; background-image: linear-gradient(to right, var(--accent) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); background-repeat: no-repeat; }
 #progressSlider::-webkit-slider-thumb { appearance: none; width: 0; height: 0; } 
 
 /* CONTROLES */
 .controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-.main-controls { display: flex; gap: 15px; align-items: center; justify-content: center; flex: 1; }
+.main-controls { display: flex; gap: 10px; align-items: center; justify-content: center; flex: 1; }
 
-.btn.icon-btn { 
-    background: transparent; border: none; color: #fff; cursor: pointer; 
-    padding: 10px; border-radius: 50%; transition: 0.2s; 
-    display: flex; align-items: center; justify-content: center; 
-    width: 45px; height: 45px; 
-}
+.btn.icon-btn { background: transparent; border: none; color: #fff; cursor: pointer; padding: 10px; border-radius: 50%; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; }
 .btn.icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
 .btn.icon-btn svg { width: 24px; height: 24px; }
 
-.btn.primary.big-play { 
-    width: 70px; height: 70px; 
-    border-radius: 50%; 
-    background: var(--accent); 
-    border: none; color: #000; cursor: pointer; 
-    display: flex; align-items: center; justify-content: center; 
-    box-shadow: 0 0 20px var(--accent); 
-    transition: 0.3s; 
-}
+/* === NOVOS BOTÕES PEQUENOS (5s) === */
+.btn.icon-btn.small { width: 35px; height: 35px; opacity: 0.6; }
+.btn.icon-btn.small:hover { opacity: 1; background: rgba(255,255,255,0.05); }
+.btn.icon-btn.small svg { width: 18px; height: 18px; }
+
+.btn.primary.big-play { width: 70px; height: 70px; border-radius: 50%; background: var(--accent); border: none; color: #000; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px var(--accent); transition: 0.3s; }
 .btn.primary.big-play:hover { transform: scale(1.1); background: #fff; }
 .btn.primary.big-play svg { width: 32px; height: 32px; fill: currentColor; }
 
-.volume-control { 
-    display: flex; align-items: center; gap: 10px; 
-    width: 130px; background: rgba(0,0,0,0.3); 
-    padding: 10px 15px; border-radius: 30px; 
-}
+.volume-control { display: flex; align-items: center; gap: 10px; width: 130px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 30px; }
 #volumeSlider { width: 100%; height: 4px; appearance: none; background: rgba(255,255,255,0.2); border-radius: 2px; }
 
-/* === VINIL E CENA === */
+/* VINIL E CENA */
 .hero-player { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
 .player-scene { position: relative; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center; }
-
-.vinyl-disk {
-  width: 340px; height: 340px; 
-  border-radius: 50%; 
-  background: #101010; 
-  position: relative; 
-  box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-  z-index: 2;
-  border: 4px solid #050505;
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: spin 4s linear infinite; 
-  animation-play-state: paused;
-  margin: 0 auto; 
-}
+.vinyl-disk { width: 340px; height: 340px; border-radius: 50%; background: #101010; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.6); z-index: 2; border: 4px solid #050505; transition: transform 0.5s; animation: spin 4s linear infinite; animation-play-state: paused; margin: 0 auto; }
 .vinyl-disk.spinning { animation-play-state: running; }
-
-.vinyl-grooves { 
-    position: absolute; inset: 4px; border-radius: 50%;
-    background: repeating-radial-gradient(#111 0, #111 2px, #222 3px, #181818 4px);
-    z-index: 1; box-shadow: inset 0 0 0 5px #050505;
-}
-
-.vinyl-shine {
-    position: absolute; inset: 0; border-radius: 50%;
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.15) 70deg, transparent 100deg, transparent 180deg, rgba(255,255,255,0.15) 250deg, transparent 280deg);
-    z-index: 2; pointer-events: none; filter: blur(8px); mix-blend-mode: overlay;
-}
-
-.vinyl-label { 
-    position: absolute; inset: 0; margin: auto; 
-    width: 35%; height: 35%; 
-    border-radius: 50%; overflow: hidden; 
-    border: 2px solid rgba(255,255,255,0.1); 
-    background: #333; z-index: 3;
-}
+.vinyl-grooves { position: absolute; inset: 4px; border-radius: 50%; background: repeating-radial-gradient(#111 0, #111 2px, #222 3px, #181818 4px); z-index: 1; box-shadow: inset 0 0 0 5px #050505; }
+.vinyl-shine { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.15) 70deg, transparent 100deg, transparent 180deg, rgba(255,255,255,0.15) 250deg, transparent 280deg); z-index: 2; pointer-events: none; filter: blur(8px); mix-blend-mode: overlay; }
+.vinyl-label { position: absolute; inset: 0; margin: auto; width: 35%; height: 35%; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); background: #333; z-index: 3; }
 .vinyl-label img { width: 100%; height: 100%; object-fit: cover; }
 .vinyl-hole { position: absolute; inset: 0; margin: auto; width: 12px; height: 12px; background: #000; border-radius: 50%; z-index: 10; border: 2px solid #222; }
-
-/* PERSONAGEM POPUP */
-.character-popup { 
-    position: absolute; bottom: -30px; right: -70px; 
-    height: 300px; width: auto; 
-    filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; 
-    transition: all 0.6s; transform-origin: bottom center; 
-}
+.character-popup { position: absolute; bottom: -30px; right: -70px; height: 300px; width: auto; filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; transition: all 0.6s; transform-origin: bottom center; }
 .character-popup.hide { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-10deg); filter: blur(10px); }
 
-/* === LISTA E LETRAS === */
+/* LISTA, LETRAS E MODAL */
 .section { padding: 20px; }
 .tracks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 0 20px; }
-
-.track { 
-    padding: 18px; 
-    border-radius: 14px; 
-    background: rgba(20, 20, 20, 0.6); 
-    border: 1px solid transparent; 
-    cursor: pointer; transition: 0.2s; 
-    display: flex; justify-content: space-between; align-items: center; 
-}
+.track { padding: 18px; border-radius: 14px; background: rgba(20, 20, 20, 0.6); border: 1px solid transparent; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
 .track:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
 .track.active { background: var(--accent); color: #000; font-weight: 800; box-shadow: 0 0 30px var(--accent); }
 
-/* LETRAS */
-.lyrics-panel {
-    display: none; margin: 15px 0; height: 140px; 
-    overflow-y: auto; text-align: center; position: relative;
-    background: rgba(0, 0, 0, 0.4); border-radius: 12px;
-    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    scrollbar-width: none;
-}
+.lyrics-panel { display: none; margin: 15px 0; height: 140px; overflow-y: auto; text-align: center; position: relative; background: rgba(0, 0, 0, 0.4); border-radius: 12px; mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); scrollbar-width: none; }
 body.lyrics-active .lyrics-panel { display: block; animation: slideOpen 0.3s ease; }
 .l-line { padding: 6px; color: var(--muted); opacity: 0.5; transition: 0.3s; }
 .l-line.active { color: #fff; font-size: 1.1rem; opacity: 1; font-weight: bold; text-shadow: 0 0 10px var(--accent); transform: scale(1.05); }
 
-/* === INTRO E MODAIS === */
-.intro { 
-    position: fixed; inset: 0; 
-    display: flex; align-items: center; justify-content: center; 
-    z-index: 3000; 
-    background: radial-gradient(circle at center, rgba(45, 27, 20, 0.4) 0%, #000 100%);
-    backdrop-filter: blur(10px); 
-    transition: opacity 0.8s ease-out; 
-}
-.intro-card { 
-    padding: 60px 40px; text-align: center; width: 90%; max-width: 600px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-    animation: floatCard 6s ease-in-out infinite;
-}
-.intro h1 { 
-    font-size: clamp(2.5rem, 8vw, 5rem); margin-bottom: 10px; color: var(--accent); 
-    text-transform: uppercase; line-height: 1;
-    background: linear-gradient(to bottom, #fff7ed 0%, var(--accent) 70%, #7c2d12 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.intro-btn { 
-    border-radius: 50px; padding: 20px 50px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none;
-    background: linear-gradient(180deg, rgba(217, 119, 6, 0.2) 0%, rgba(0,0,0,0.8) 100%);
-    color: #fff; margin-top: 30px; width: auto; font-size: 1.1rem; transition: 0.3s;
-}
+/* INTRO E MODAL */
+.intro { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 3000; background: radial-gradient(circle at center, rgba(45, 27, 20, 0.4) 0%, #000 100%); backdrop-filter: blur(10px); transition: opacity 0.8s ease-out; }
+.intro-card { padding: 60px 40px; text-align: center; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); animation: floatCard 6s ease-in-out infinite; }
+.intro h1 { font-size: clamp(2.5rem, 8vw, 5rem); margin-bottom: 10px; color: var(--accent); text-transform: uppercase; line-height: 1; background: linear-gradient(to bottom, #fff7ed 0%, var(--accent) 70%, #7c2d12 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.intro-btn { border-radius: 50px; padding: 20px 50px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; background: linear-gradient(180deg, rgba(217, 119, 6, 0.2) 0%, rgba(0,0,0,0.8) 100%); color: #fff; margin-top: 30px; width: auto; font-size: 1.1rem; transition: 0.3s; }
 .intro-btn:hover { transform: scale(1.05); background: var(--accent); color: #000; }
 
-.modal { 
-    position: fixed; inset: 0; z-index: 2100; 
-    background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; 
-    opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(5px); 
-}
+.modal { position: fixed; inset: 0; z-index: 2100; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(5px); }
 .modal.show { opacity: 1; pointer-events: auto; }
-.modal-content { 
-    background: #151515; padding: 40px; border-radius: 24px; 
-    width: 90%; max-width: 450px; border: 1px solid #333; text-align: center; 
-}
+.modal-content { background: #151515; padding: 40px; border-radius: 24px; width: 90%; max-width: 600px; border: 1px solid #333; text-align: center; max-height: 85vh; overflow-y: auto; }
 .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; color: #aaa; }
 .highlight { color: #fff; font-weight: bold; }
-.achievement-toast { 
-    position: fixed; bottom: 30px; right: 30px; 
-    background: #222; border-left: 5px solid var(--accent); color: #fff; 
-    padding: 15px 25px; border-radius: 8px; z-index: 2000; 
-    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 3.5s forwards; 
+.achievement-toast { position: fixed; bottom: 30px; right: 30px; background: #222; border-left: 5px solid var(--accent); color: #fff; padding: 15px 25px; border-radius: 8px; z-index: 2000; animation: slideInRight 0.5s ease, fadeOut 0.5s ease 3.5s forwards; }
+
+/* === GRID DE CONQUISTAS (NOVO) === */
+.achievements-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 15px; 
+    margin-top: 15px; 
 }
 
-/* === ANIMAÇÕES === */
+.ach-card { 
+    background: rgba(255,255,255,0.05); 
+    padding: 15px; 
+    border-radius: 12px; 
+    border: 1px solid transparent; 
+    text-align: left; 
+    transition: 0.3s; 
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ach-card.locked { 
+    opacity: 0.5; 
+    filter: grayscale(1); 
+    border: 1px dashed #444; 
+}
+
+.ach-card.unlocked { 
+    border-color: var(--accent); 
+    background: linear-gradient(145deg, rgba(217, 119, 6, 0.15), rgba(0,0,0,0));
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+}
+
+.ach-title { 
+    font-weight: 800; 
+    font-size: 0.95rem; 
+    color: #fff; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+}
+
+.ach-desc { 
+    font-size: 0.8rem; 
+    color: #aaa; 
+    line-height: 1.3;
+}
+
+/* MEDIA QUERIES */
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideOpen { from { height: 0; opacity: 0; } to { height: 140px; opacity: 1; } }
@@ -378,7 +178,6 @@ body.lyrics-active .lyrics-panel { display: block; animation: slideOpen 0.3s eas
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
 
-/* === MOBILE === */
 @media (max-width: 950px) {
     .hero { display: flex; flex-direction: column; text-align: center; gap: 40px; padding: 20px; margin: 10px; }
     .hero-player { order: -1; transform: scale(0.9); }
@@ -387,4 +186,6 @@ body.lyrics-active .lyrics-panel { display: block; animation: slideOpen 0.3s eas
     .character-popup { height: 200px; right: -20px; bottom: -20px; }
     .controls-row { justify-content: center; flex-direction: column; }
     .volume-control { width: 100%; max-width: 300px; }
+    .main-controls { gap: 8px; flex-wrap: wrap; } 
+    /* Ajuste para não quebrar no mobile */
 }
