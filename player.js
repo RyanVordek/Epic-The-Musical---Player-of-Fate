@@ -559,4 +559,3 @@ function formatTime(s) {
     const sec = Math.floor(s%60);
     return `${m}:${sec<10?'0'+sec:sec}`;
 }
-}
