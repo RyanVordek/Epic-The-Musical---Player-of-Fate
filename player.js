@@ -1,4 +1,4 @@
-/* ========= EPIC Player - Ultimate Edition (Final Logic) ========== */
+/* ========= EPIC Player - Ultimate Edition (Fixed Buttons) ========== */
 
 /* --- CONFIGURAÇÃO DE TEMAS --- */
 const themeBySaga = {
@@ -13,7 +13,7 @@ const themeBySaga = {
     Ithaca:     { bg: "#7f1d1d", accent: "#fb7185" },
 };
 
-/* --- LISTA DE FAIXAS --- */
+/* --- LISTA DE FAIXAS (Mantida Original) --- */
 const tracks = [
   { title: "The Horse and the Infant", saga: "Troy", index: 1, id: "bWIgy-Ls-SU", stickers: [0,1,2,3] },
   { title: "Just a Man", saga: "Troy", index: 2, id: "hNdvp9Qo8PA", stickers: [4,5,6] },
@@ -298,7 +298,7 @@ const LyricsManager = {
 };
 
 /* =================================================================
-   5. PLAYER CORE & CONTROLES
+   5. PLAYER CORE & CONTROLES (BOTÕES CORRIGIDOS AQUI)
    ================================================================= */
 let currentIndex = 0;
 let stickerInterval = null;
@@ -308,6 +308,7 @@ let isLoop = false;
 let audio, playBtn, shuffleBtn, loopBtn, favBtn, vinylDisk, albumCover, stickerChar, progressSlider, volumeSlider;
 
 function init() {
+    // Pegando Elementos
     audio = document.getElementById('audioEl');
     playBtn = document.getElementById('playPauseBtn');
     shuffleBtn = document.getElementById('shuffleBtn');
@@ -323,38 +324,82 @@ function init() {
     BackgroundManager.init();
     LyricsManager.init();
     
-    // Controles Básicos
-    playBtn.onclick = togglePlay;
-    document.getElementById('nextBtn').onclick = () => changeTrack(1);
-    document.getElementById('prevBtn').onclick = () => changeTrack(-1);
+    // --- LÓGICA CORRIGIDA DOS BOTÕES ---
     
-    // NOVOS CONTROLES DE PULAR 5s
-    document.getElementById('rewindBtn').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); };
-    document.getElementById('forwardBtn').onclick = () => { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); };
+    // Play/Pause
+    if(playBtn) playBtn.onclick = togglePlay;
+
+    // Próxima e Anterior
+    const btnNext = document.getElementById('nextBtn');
+    if(btnNext) btnNext.onclick = () => changeTrack(1);
+
+    const btnPrev = document.getElementById('prevBtn');
+    if(btnPrev) btnPrev.onclick = () => changeTrack(-1);
     
-    shuffleBtn.onclick = toggleShuffle;
-    loopBtn.onclick = toggleLoop;
-    favBtn.onclick = () => { const t = tracks[currentIndex]; const isFav = StatsManager.toggleFavorite(t); updateFavIcon(isFav); };
+    // --- BOTÕES DE PULAR 5 SEGUNDOS (Safe Mode) ---
+    const btnRewind = document.getElementById('rewindBtn');
+    if(btnRewind) {
+        btnRewind.onclick = () => {
+            if (audio) {
+                audio.currentTime = Math.max(0, audio.currentTime - 5);
+            }
+        };
+    }
+
+    const btnForward = document.getElementById('forwardBtn');
+    if(btnForward) {
+        btnForward.onclick = () => {
+            if (audio) {
+                // Se a duração não carregou (NaN), usa 99999 pra garantir que pule sem erro
+                const maxTime = audio.duration || 999999;
+                audio.currentTime = Math.min(maxTime, audio.currentTime + 5);
+            }
+        };
+    }
+    
+    // Outros Controles
+    if(shuffleBtn) shuffleBtn.onclick = toggleShuffle;
+    if(loopBtn) loopBtn.onclick = toggleLoop;
+    if(favBtn) favBtn.onclick = () => { const t = tracks[currentIndex]; const isFav = StatsManager.toggleFavorite(t); updateFavIcon(isFav); };
 
     // Stats Modal
-    document.getElementById('statsBtn').onclick = () => { StatsManager.updateUI(); document.getElementById('statsModal').classList.add('show'); };
-    document.getElementById('closeStats').onclick = () => { document.getElementById('statsModal').classList.remove('show'); };
+    const btnStats = document.getElementById('statsBtn');
+    const modalStats = document.getElementById('statsModal');
+    const btnCloseStats = document.getElementById('closeStats');
+
+    if(btnStats && modalStats) btnStats.onclick = () => { StatsManager.updateUI(); modalStats.classList.add('show'); };
+    if(btnCloseStats && modalStats) btnCloseStats.onclick = () => { modalStats.classList.remove('show'); };
     
-    volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
-    volumeSlider.addEventListener('change', (e) => { StatsManager.logVolume(tracks[currentIndex], e.target.value); });
+    // Sliders
+    if(volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
+        volumeSlider.addEventListener('change', (e) => { StatsManager.logVolume(tracks[currentIndex], e.target.value); });
+    }
 
-    progressSlider.addEventListener('input', (e) => { if(audio.duration) { const time = (e.target.value / 100) * audio.duration; audio.currentTime = time; } });
+    if(progressSlider) {
+        progressSlider.addEventListener('input', (e) => { if(audio.duration) { const time = (e.target.value / 100) * audio.duration; audio.currentTime = time; } });
+    }
 
+    // Eventos de Áudio
     audio.addEventListener('timeupdate', updateProgress);
     audio.addEventListener('ended', onTrackEnded);
     audio.addEventListener('error', onAudioError);
     
     renderTrackList();
 
-    document.getElementById('intro').style.opacity = '0';
-    setTimeout(() => { document.getElementById('intro').style.display = 'none'; document.getElementById('mainContent').hidden = false; loadTrack(0); }, 500);
+    // Fade In da Intro
+    const intro = document.getElementById('intro');
+    if(intro) {
+        intro.style.opacity = '0';
+        setTimeout(() => { 
+            intro.style.display = 'none'; 
+            document.getElementById('mainContent').hidden = false; 
+            loadTrack(0); 
+        }, 500);
+    }
 }
 
+// Expõe a função para o botão "Iniciar A Odisseia" no HTML
 window.startExperience = init;
 
 function loadTrack(index) {
@@ -381,21 +426,22 @@ function loadTrack(index) {
     handleStickers(t);
     highlightTrackInList(index);
     
-    vinylDisk.classList.remove('spinning');
+    if(vinylDisk) vinylDisk.classList.remove('spinning');
     updatePlayIcon(false);
-    playBtn.dataset.playing = "false";
-    progressSlider.value = 0;
+    if(playBtn) playBtn.dataset.playing = "false";
+    if(progressSlider) progressSlider.value = 0;
 }
 
 function renderTrackList() {
     const grid = document.getElementById('tracksGrid');
+    if(!grid) return;
     grid.innerHTML = '';
     tracks.forEach((t, i) => {
         const el = document.createElement('div');
         el.className = 'track';
         el.dataset.index = i;
         el.innerHTML = `<div>${t.index}. ${t.title}</div><div style="font-size:0.8rem; opacity:0.7;">${t.saga}</div>`;
-        el.onclick = () => { loadTrack(i); setTimeout(() => { audio.play(); vinylDisk.classList.add('spinning'); updatePlayIcon(true); }, 100); };
+        el.onclick = () => { loadTrack(i); setTimeout(() => { audio.play(); if(vinylDisk) vinylDisk.classList.add('spinning'); updatePlayIcon(true); }, 100); };
         grid.appendChild(el);
     });
 }
@@ -409,6 +455,8 @@ function highlightTrackInList(index) {
 function handleStickers(track) {
     clearInterval(stickerInterval);
     currentStickerIndex = 0;
+    if(!stickerChar) return;
+
     const update = () => {
         if(!track.stickers || track.stickers.length === 0) { stickerChar.classList.add('hide'); return; }
         const num = track.stickers[currentStickerIndex];
@@ -427,8 +475,20 @@ function handleStickers(track) {
 }
 
 function togglePlay() {
-    if (audio.paused) { audio.play().then(() => { vinylDisk.classList.add('spinning'); updatePlayIcon(true); playBtn.dataset.playing = "true"; }).catch(err => console.error("Erro ao reproduzir:", err)); } 
-    else { audio.pause(); vinylDisk.classList.remove('spinning'); updatePlayIcon(false); playBtn.dataset.playing = "false"; }
+    if (!audio) return;
+    if (audio.paused) { 
+        audio.play().then(() => { 
+            if(vinylDisk) vinylDisk.classList.add('spinning'); 
+            updatePlayIcon(true); 
+            if(playBtn) playBtn.dataset.playing = "true"; 
+        }).catch(err => console.error("Erro ao reproduzir:", err)); 
+    } 
+    else { 
+        audio.pause(); 
+        if(vinylDisk) vinylDisk.classList.remove('spinning'); 
+        updatePlayIcon(false); 
+        if(playBtn) playBtn.dataset.playing = "false"; 
+    }
 }
 
 function toggleShuffle() {
@@ -450,14 +510,14 @@ function changeTrack(offset) {
     if (offset === 1 && isShuffle) { do { next = Math.floor(Math.random() * tracks.length); } while (next === currentIndex && tracks.length > 1); } 
     else { next = currentIndex + offset; if(next >= tracks.length) next = 0; if(next < 0) next = tracks.length - 1; }
     loadTrack(next);
-    setTimeout(() => { audio.play(); vinylDisk.classList.add('spinning'); updatePlayIcon(true); }, 100); 
+    setTimeout(() => { audio.play(); if(vinylDisk) vinylDisk.classList.add('spinning'); updatePlayIcon(true); }, 100); 
 }
 
 function updateProgress() {
     const cur = audio.currentTime;
     if(audio.duration) {
         const pct = (cur / audio.duration) * 100;
-        progressSlider.value = pct;
+        if(progressSlider) progressSlider.value = pct;
         document.documentElement.style.setProperty('--progress-width', `${pct}%`);
         document.getElementById('currentTime').textContent = formatTime(cur);
         document.getElementById('totalTime').textContent = formatTime(audio.duration);
@@ -475,8 +535,10 @@ function onAudioError() {
 }
 
 function updatePlayIcon(isPlaying) {
-    document.getElementById('iconPlay').style.display = isPlaying ? 'none' : 'block';
-    document.getElementById('iconPause').style.display = isPlaying ? 'block' : 'none';
+    const iPlay = document.getElementById('iconPlay');
+    const iPause = document.getElementById('iconPause');
+    if(iPlay) iPlay.style.display = isPlaying ? 'none' : 'block';
+    if(iPause) iPause.style.display = isPlaying ? 'block' : 'none';
 }
 
 function updateFavIcon(isFav) {
