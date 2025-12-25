@@ -364,8 +364,7 @@ body.lyrics-active .lyrics-panel {
   .vinyl-disk { width: 260px !important; height: 260px !important; }  .player-scene { width: 240px !important; height: 240px !important; }
     .player-scene { width: 300px !important; height: 300px !important; }
   .vinyl-label { width: 90px !important; height: 90px !important; }  .character-popup { height: 180px !important; bottom: -20px !important; right: -40px !important; }
-  .nowplaying { padding: 15px; }
-  .np-title { font-size: 1.1rem; }
+  .nowplaying { padding: 15px; padding-bottom: 60px; min-height: 100%; }  .np-title { font-size: 1.1rem; }
   .tracks-grid { grid-template-columns: 1fr; }
   .btn.icon-btn { width: 40px; height: 40px; }
   .btn.icon-btn { width: 50px; height: 50px; }  .intro-card { padding: 30px 20px; }
