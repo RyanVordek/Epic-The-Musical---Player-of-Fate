@@ -1,395 +1,701 @@
-:root {
-  /* Paleta de Cores Base */
-  --bg-base: #1a0b08;
-  --accent: #d97706; /* Laranja Épico */
-  --text: #fff7ed;
-  --muted: #a8a29e;
-  
-  /* Vidro e Bordas */
-  --glass: rgba(20, 10, 5, 0.7);
-  --stroke: rgba(255, 255, 255, 0.15);
-  --radius: 24px;
-  
-  /* Progresso (Controlado via JS) */
-  --progress-width: 0%;
+/* ========= EPIC Player - Ultimate Edition (Mobile & Sagas) ========== */
+
+// --- CONFIGURAÇÃO DE TEMAS ---
+const themeBySaga = {
+    Troy:       { bg: "#2d1b14", accent: "#fbbf24" },
+    Cyclops:    { bg: "#450a0a", accent: "#ef4444" },
+    Ocean:      { bg: "#082f49", accent: "#38bdf8" },
+    Circe:      { bg: "#581c87", accent: "#f0abfc" },
+    Underworld: { bg: "#111827", accent: "#9ca3af" },
+    Thunder:    { bg: "#713f12", accent: "#facc15" },
+    Wisdom:     { bg: "#312e81", accent: "#a78bfa" },
+    Vengeance:  { bg: "#064e3b", accent: "#34d399" },
+    Ithaca:     { bg: "#7f1d1d", accent: "#fb7185" },
+};
+
+/* --- LISTA DE FAIXAS --- */
+const tracks = [
+  { title: "The Horse and the Infant", saga: "Troy", index: 1, id: "bWIgy-Ls-SU", stickers: [0,1,2,3] },
+  { title: "Just a Man", saga: "Troy", index: 2, id: "hNdvp9Qo8PA", stickers: [4,5,6] },
+  { title: "Full Speed Ahead", saga: "Troy", index: 3, id: "x3KOt-3T73c", stickers: [7,8,9] },
+  { title: "Open Arms", saga: "Troy", index: 4, id: "-oMZw8DQbaI", stickers: [10,11,12] },
+  { title: "Warrior of the Mind", saga: "Troy", index: 5, id: "oB8lqgO9e24", stickers: [13,14,15] },
+  { title: "Polyphemus", saga: "Cyclops", index: 6, id: "nDQyFHmuQls", stickers: [16,17,18] },
+  { title: "Survive", saga: "Cyclops", index: 7, id: "rND9-qeA7Lo", stickers: [19,20,21] },
+  { title: "Remember Them", saga: "Cyclops", index: 8, id: "NGxrhdgAg18", stickers: [22,23] },
+  { title: "My Goodbye", saga: "Cyclops", index: 9, id: "xrFaGilus6o", stickers: [24,25] },
+  { title: "Storm", saga: "Ocean", index: 10, id: "sRntPU_s-gI", stickers: [26,27,28] },
+  { title: "Luck Runs Out", "saga": "Ocean", index: 11, id: "ZxQHl2fVJ-s", stickers: [29,30] },
+  { title: "Keep Your Friends Close", "saga": "Ocean", index: 12, id: "Z-Y0iMmFzFE", stickers: [31,32] },
+  { title: "Ruthlessness", saga: "Ocean", index: 13, id: "3dzBlSeCJNg", stickers: [33,34] },
+  { title: "Puppeteer", saga: "Circe", index: 14, id: "Mz2ASoe6OG0", stickers: [35,36] },
+  { title: "Wouldn't You Like", saga: "Circe", index: 15, id: "xkIBM71E0_w", stickers: [37,38] },
+  { title: "Done For", saga: "Circe", index: 16, id: "km6NITbLVHc", stickers: [39,40] },
+  { title: "There Are Other Ways", "saga": "Circe", index: 17, id: "uXdLAOBANGE", stickers: [41,42] },
+  { title: "The Underworld", saga: "Underworld", index: 18, "id": "cyqul8pKHko", stickers: [43,44] },
+  { title: "No Longer You", saga: "Underworld", index: 19, "id": "BZ8qL5P270Q", stickers: [45,46] },
+  { title: "Monster", saga: "Underworld", index: 20, "id": "4Q0Un9PQ0wk", stickers: [47,48] },
+  { title: "Suffering", saga: "Thunder", index: 21, "id": "-u_-wpcpY-0", stickers: [49,50] },
+  { title: "Different Beast", saga: "Thunder", index: 22, "id": "x2r7dKWFbP8", stickers: [51,52] },
+  { title: "Scylla", saga: "Thunder", index: 23, "id": "PTGWC85tLfg", stickers: [53,54] },
+  { title: "Mutiny", saga: "Thunder", index: 24, "id": "x_xJEfDB7y0", stickers: [55,56] },
+  { title: "Thunder Bringer", saga: "Thunder", index: 25, "id": "cAId1J7msWI", stickers: [57,58] },
+  { title: "Legendary", saga: "Wisdom", index: 26, "id": "Z9NNit-z8wE", stickers: [59,60] },
+  { title: "Little Wolf", saga: "Wisdom", index: 27, "id": "-gqU2V1snnc", stickers: [61,62] },
+  { title: "We'll Be Fine", saga: "Wisdom", index: 28, "id": "3pIXn3zHkpc", stickers: [63,64] },
+  { title: "Love in Paradise", saga: "Wisdom", index: 29, "id": "jWOpikivhbQ", stickers: [65,66] },
+  { title: "God Games", saga: "Wisdom", index: 30, "id": "5m3Xe7iDivk", stickers: [67,68] },
+  { title: "Not Sorry for Loving You", saga: "Vengeance", index: 31, "id": "7M3gzo-hSCo", stickers: [69,70] },
+  { title: "Dangerous", saga: "Vengeance", index: 32, "id": "jZW2GnEcjpM", stickers: [71,72] },
+  { title: "Charybdis", saga: "Vengeance", index: 33, "id": "4n0U1Erga90", stickers: [73,74] },
+  { title: "Get in the Water", saga: "Vengeance", index: 34, "id": "8njnTRKGdYw", stickers: [75,76] },
+  { title: "Six Hundred Strike", saga: "Vengeance", index: 35, "id": "T3rnBuSTNhY", stickers: [77,78] },
+  { title: "The Challenge", saga: "Ithaca", index: 36, "id": "Bb6ssHUxrNk", stickers: [79,80] },
+  { title: "Hold Them Down", saga: "Ithaca", index: 37, "id": "oeDDZNKHOVo", stickers: [81,82] },
+  { title: "Odysseus", saga: "Ithaca", index: 38, "id": "UjcV3CYfCsM", stickers: [83,84] },
+  { title: "I Can't Help but Wonder", saga: "Ithaca", index: 39, "id": "FBfT0E6oF6I", stickers: [85,86] },
+  { title: "Would You Fall in Love with Me Again", saga: "Ithaca", index: 40, "id": "rF5tJ8xuaIc", stickers: [87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109] }
+];
+
+/* =================================================================
+   1. SISTEMA DE STATS & CONQUISTAS
+   ================================================================= */
+const AchievementList = [
+    { id: 'first_play', name: "O Início", desc: "Ouviu a primeira música.", check: (s) => s.totalPlays >= 1 },
+    { id: 'fan_10', name: "Fã Dedicado", desc: "Ouviu 10 músicas.", check: (s) => s.totalPlays >= 10 },
+    { id: 'fan_50', name: "Viciado", desc: "Ouviu 50 músicas.", check: (s) => s.totalPlays >= 50 },
+    { id: 'lover', name: "Amado", desc: "Favoritou 3 músicas.", check: (s) => s.favCount >= 3 },
+    { id: 'max_vol', name: "No Talo", desc: "Colocou o volume no máximo.", check: (s, track, vol) => vol >= 1 }
+];
+
+const StatsManager = {
+    data: { plays: {}, achievements: [], totalPlays: 0, favCount: 0 },
+    
+    load() {
+        const stored = localStorage.getItem('epic_stats_final');
+        if (stored) this.data = JSON.parse(stored);
+    },
+    
+    save() {
+        localStorage.setItem('epic_stats_final', JSON.stringify(this.data));
+    },
+
+    showToast(title) {
+        const toast = document.createElement('div');
+        toast.className = 'achievement-toast';
+        toast.innerHTML = `🏆 Conquista: <strong>${title}</strong>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    },
+
+    checkAchievements(track, vol = 0) {
+        AchievementList.forEach(ach => {
+            if (!this.data.achievements.includes(ach.id)) {
+                if (ach.check(this.data, track, vol)) {
+                    this.data.achievements.push(ach.id);
+                    this.showToast(ach.name);
+                    this.save();
+                }
+            }
+        });
+    },
+
+    logPlay(track) {
+        if (!this.data.plays[track.id]) this.data.plays[track.id] = 0;
+        this.data.plays[track.id]++;
+        this.data.totalPlays++;
+        this.checkAchievements(track);
+        this.save();
+    },
+
+    logVolume(track, vol) {
+        this.checkAchievements(track, vol);
+    },
+
+    toggleFavorite(track) {
+        const id = track.id;
+        const key = 'fav_' + id;
+        const isFav = !(localStorage.getItem(key) === 'true');
+        localStorage.setItem(key, isFav);
+        if (isFav) this.data.favCount++;
+        else this.data.favCount--;
+        this.checkAchievements(track);
+        this.save();
+        return isFav;
+    },
+
+    isFavorite(id) { return localStorage.getItem('fav_' + id) === 'true'; },
+
+    updateUI() {
+        let mostPlayed = { id: null, count: 0 };
+        for(let id in this.data.plays) {
+            if(this.data.plays[id] > mostPlayed.count) mostPlayed = { id, count: this.data.plays[id] };
+        }
+        const track = tracks.find(t => t.id === mostPlayed.id);
+        const mostPlayedText = track ? `${track.title} (${mostPlayed.count}x)` : "Nenhuma";
+        document.getElementById('statMostPlayed').textContent = mostPlayedText;
+        document.getElementById('statTotalPlays').textContent = this.data.totalPlays;
+        document.getElementById('statBadges').textContent = `${this.data.achievements.length} Desbloqueadas`;
+    }
+};
+
+/* =================================================================
+   2. GERENCIADOR DE FUNDOS (EFEITOS VISUAIS)
+   ================================================================= */
+const BackgroundManager = {
+    currentSaga: null,
+    waterRenderer: null,
+    underworldRenderer: null,
+    
+    init() {
+        this.waterRenderer = new RippleRenderer();
+        this.underworldRenderer = new UnderworldRenderer();
+        
+        this.troySvg = document.getElementById('saga-troy');
+        this.troyPath = document.getElementById('horsePath');
+        this.cyclopsDiv = document.getElementById('saga-cyclops');
+        this.underworldDiv = document.getElementById('saga-underworld');
+        
+        // Preparar caminho SVG de Troia
+        if(this.troyPath) {
+            this.pathLength = this.troyPath.getTotalLength();
+            this.troyPath.style.strokeDasharray = this.pathLength;
+            this.troyPath.style.strokeDashoffset = this.pathLength;
+        }
+    },
+    
+    setSaga(sagaName) {
+        if (this.currentSaga === sagaName) return;
+        this.currentSaga = sagaName;
+        
+        // 1. Resetar Visuais
+        if(this.waterRenderer) this.waterRenderer.active = false;
+        if(this.underworldRenderer) this.underworldRenderer.active = false;
+        
+        if(this.troySvg) this.troySvg.style.display = 'none';
+        if(this.cyclopsDiv) this.cyclopsDiv.style.display = 'none';
+        if(this.underworldDiv) this.underworldDiv.style.display = 'none';
+        document.getElementById('waterCanvas').style.display = 'none';
+        
+        // 2. Ativar Saga Específica
+        switch(sagaName) {
+            case 'Troy':
+                if(this.troySvg) {
+                    this.troySvg.style.display = 'block';
+                    this.troyPath.style.strokeDashoffset = this.pathLength;
+                }
+                break;
+
+            case 'Cyclops':
+                if(this.cyclopsDiv) {
+                    this.cyclopsDiv.style.display = 'flex';
+                    // Reinicia a animação do olho
+                    const eye = this.cyclopsDiv.querySelector('.eye-shape');
+                    if(eye) {
+                        eye.style.animation = 'none';
+                        eye.offsetHeight; /* trigger reflow */
+                        eye.style.animation = 'openEye 3s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+                    }
+                }
+                break;
+                
+            case 'Ocean':
+            case 'Vengeance': 
+                if(this.waterRenderer) {
+                    this.waterRenderer.active = true;
+                    document.getElementById('waterCanvas').style.display = 'block';
+                }
+                break;
+
+            case 'Underworld':
+                if(this.underworldDiv) {
+                    this.underworldDiv.style.display = 'block';
+                    this.underworldRenderer.active = true;
+                    this.underworldRenderer.loop();
+                }
+                break;
+                
+            default:
+                break;
+        }
+    },
+    
+    updateAnimation(currentTime, duration) {
+        if (!duration) return;
+        const progress = currentTime / duration;
+        
+        // Animação Troia
+        if (this.currentSaga === 'Troy' && this.troyPath) {
+            const drawLength = this.pathLength * progress;
+            this.troyPath.style.strokeDashoffset = this.pathLength - drawLength;
+        }
+    }
+};
+
+/* =================================================================
+   3. EFEITOS DE RENDERIZAÇÃO (ÁGUA E SUBMUNDO)
+   ================================================================= */
+
+// --- EFEITO ÁGUA (Ripples) ---
+class RippleRenderer {
+    constructor() {
+        this.canvas = document.getElementById('waterCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.ripples = [];
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.active = false;
+        
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        // Criar gotas aleatórias
+        setInterval(() => {
+            if (this.active && !document.hidden) {
+                this.addRipple(Math.random()*this.width, Math.random()*this.height);
+            }
+        }, 400); 
+        
+        this.loop();
+    }
+    
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+    }
+    
+    addRipple(x, y) {
+        this.ripples.push({x, y, age: 0, size: 2, power: 1.0});
+    }
+    
+    loop() {
+        if (!this.active || document.hidden) {
+            requestAnimationFrame(() => this.loop());
+            return;
+        }
+
+        this.ctx.clearRect(0,0, this.width, this.height);
+        
+        // Cor da água baseada na saga (levemente azulada)
+        this.ctx.fillStyle = "rgba(8, 47, 73, 0.1)"; 
+        this.ctx.fillRect(0,0, this.width, this.height);
+        
+        for(let i=0; i<this.ripples.length; i++) {
+            let r = this.ripples[i];
+            r.age++;
+            r.size += 1.5; 
+            r.power -= 0.01;
+            
+            if(r.power <= 0) {
+                this.ripples.splice(i, 1);
+                i--;
+                continue;
+            }
+            
+            this.ctx.beginPath();
+            this.ctx.ellipse(r.x, r.y, r.size, r.size * 0.5, 0, 0, Math.PI * 2);
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = `rgba(100, 200, 255, ${r.power * 0.4})`;
+            this.ctx.stroke();
+        }
+        requestAnimationFrame(() => this.loop());
+    }
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; }
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  color: var(--text);
-  background: #000;
-  overflow-x: hidden;
-  transition: background 1s ease;
+// --- EFEITO SUBMUNDO (Barco de Estrelas) ---
+class UnderworldRenderer {
+    constructor() {
+        this.canvas = document.getElementById('underworldCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.active = false;
+        
+        this.souls = []; // Luzes flutuantes
+        this.boatStars = []; // Estrelas que formam o barco
+        
+        // Criar o formato do barco
+        this.createBoatShape();
+        
+        window.addEventListener('resize', () => this.resize());
+        this.resize();
+    }
+    
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+    }
+    
+    createBoatShape() {
+        // Gera pontos em formato de canoa/barco
+        for(let i = -60; i <= 60; i+= 5) {
+            // Curva inferior do barco
+            const y = Math.pow(i/30, 2) * 10; 
+            this.boatStars.push({x: i, y: y, size: Math.random() * 2 + 1});
+            // Adicionar um mastro simples
+            if (Math.abs(i) < 2) {
+                for(let m = 0; m < 50; m+=5) this.boatStars.push({x: i, y: -m, size: 1});
+            }
+        }
+    }
+    
+    loop() {
+        if (!this.active) {
+            // Se inativo, ainda pedimos frame para não travar quando ativar, mas não desenhamos
+            // Melhor: só para o loop e reinicia no setSaga
+            return;
+        }
+        
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        
+        const time = Date.now() * 0.001;
+        
+        // 1. Posição do Barco (Oscila como se estivesse na água)
+        const boatX = this.width / 2;
+        const boatY = this.height / 2 + Math.sin(time) * 10;
+        
+        // Desenhar o Barco de Estrelas
+        this.ctx.fillStyle = "#fff";
+        this.ctx.shadowBlur = 10;
+        this.ctx.shadowColor = "cyan";
+        
+        this.boatStars.forEach(star => {
+            this.ctx.beginPath();
+            // Adiciona leve movimento individual para parecer mágico
+            const flutterX = Math.cos(time * 2 + star.y) * 2;
+            const flutterY = Math.sin(time * 3 + star.x) * 2;
+            this.ctx.arc(boatX + star.x + flutterX, boatY + star.y + flutterY, star.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+        this.ctx.shadowBlur = 0;
+        
+        // 2. Gerenciar e Desenhar Almas (Luzes indo para o barco)
+        if (this.souls.length < 50) {
+            // Criar nova alma nas bordas
+            this.souls.push({
+                x: Math.random() * this.width,
+                y: Math.random() > 0.5 ? this.height + 10 : -10,
+                speed: Math.random() * 1 + 0.5,
+                size: Math.random() * 3 + 1,
+                alpha: 0
+            });
+        }
+        
+        this.souls.forEach((soul, index) => {
+            // Mover em direção ao barco
+            const dx = boatX - soul.x;
+            const dy = boatY - soul.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            soul.x += (dx / dist) * soul.speed;
+            soul.y += (dy / dist) * soul.speed;
+            
+            // Fade in/out
+            if (dist > 200) soul.alpha = Math.min(soul.alpha + 0.01, 0.6);
+            else soul.alpha = Math.max(0, (dist - 10) / 200); // Desaparece ao chegar perto
+            
+            // Desenhar alma
+            this.ctx.beginPath();
+            this.ctx.fillStyle = `rgba(100, 200, 255, ${soul.alpha})`;
+            this.ctx.arc(soul.x, soul.y, soul.size, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            // Remover se chegou muito perto
+            if (dist < 10) this.souls.splice(index, 1);
+        });
+        
+        requestAnimationFrame(() => this.loop());
+    }
 }
 
-/* === FUNDOS E CAMADAS (SAGA SYSTEM) === */
-#sagaBackground {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -2; 
-    pointer-events: none;
-    overflow: hidden;
+/* =================================================================
+   4. GERENCIADOR DE LETRAS
+   ================================================================= */
+const LyricsManager = {
+    isEnabled: false,
+    currentLines: [],
+    
+    init() {
+        this.content = document.getElementById('lyricsContent');
+        this.btn = document.getElementById('lyricsBtn');
+        if(this.btn) this.btn.onclick = () => this.toggle();
+        if(this.content) this.content.onclick = () => { if(this.isEnabled) this.toggle(); };
+    },
+    
+    toggle() {
+        this.isEnabled = !this.isEnabled;
+        if(this.isEnabled) {
+            document.body.classList.add('lyrics-active');
+            this.btn.style.color = 'var(--accent)';
+            if(tracks[currentIndex]) this.load(tracks[currentIndex].id);
+        } else {
+            document.body.classList.remove('lyrics-active');
+            this.btn.style.color = '#fff';
+        }
+    },
+    
+    load(trackId) {
+        if (typeof LYRICS_DB === 'undefined' || !LYRICS_DB[trackId]) {
+            this.content.innerHTML = '<div class="lyrics-placeholder">...</div>';
+            this.currentLines = [];
+            return;
+        }
+        this.currentLines = LYRICS_DB[trackId];
+        let html = '';
+        this.currentLines.forEach((line, index) => {
+            html += `<p class="l-line" data-idx="${index}">${line.text}</p>`;
+        });
+        this.content.innerHTML = html;
+    },
+    
+    sync(currentTime) {
+        if (!this.isEnabled || !this.currentLines.length) return;
+        let activeIdx = -1;
+        for (let i = 0; i < this.currentLines.length; i++) {
+            if (currentTime >= this.currentLines[i].time) activeIdx = i;
+            else break;
+        }
+        if (activeIdx !== -1) {
+            const old = this.content.querySelector('.l-line.active');
+            if(old) old.classList.remove('active');
+            const currentEl = this.content.querySelector(`.l-line[data-idx="${activeIdx}"]`);
+            if (currentEl) {
+                currentEl.classList.add('active');
+                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+};
+
+/* =================================================================
+   5. PLAYER CORE
+   ================================================================= */
+let currentIndex = 0;
+let stickerInterval = null;
+let currentStickerIndex = 0;
+let isShuffle = false;
+
+const audio = document.getElementById('audioEl');
+const playBtn = document.getElementById('playPauseBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const favBtn = document.getElementById('favBtn');
+const vinylDisk = document.getElementById('vinylDisk');
+const albumCover = document.getElementById('albumCover');
+const stickerChar = document.getElementById('stickerCharacter');
+const progressSlider = document.getElementById('progressSlider');
+const volumeSlider = document.getElementById('volumeSlider');
+
+function init() {
+    StatsManager.load();
+    BackgroundManager.init();
+    LyricsManager.init();
+    
+    document.getElementById('intro').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('mainContent').hidden = false;
+        loadTrack(0);
+    }, 500);
+
+    document.getElementById('statsBtn').onclick = () => {
+        StatsManager.updateUI();
+        document.getElementById('statsModal').classList.add('show');
+    };
+    document.getElementById('closeStats').onclick = () => {
+        document.getElementById('statsModal').classList.remove('show');
+    };
+    
+    favBtn.onclick = () => {
+        const t = tracks[currentIndex];
+        const isFav = StatsManager.toggleFavorite(t);
+        updateFavIcon(isFav);
+    };
+    shuffleBtn.onclick = toggleShuffle;
 }
 
-#waterCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1; 
-    background: transparent; 
-    transition: opacity 1s ease;
-    opacity: 0.6; 
-    pointer-events: none;
+window.startExperience = init;
+
+function loadTrack(index) {
+    if (index < 0 || index >= tracks.length) return;
+    currentIndex = index;
+    const t = tracks[index];
+
+    StatsManager.logPlay(t);
+    updateFavIcon(StatsManager.isFavorite(t.id));
+    
+    // ATENÇÃO: Setar a saga ativa os efeitos visuais
+    BackgroundManager.setSaga(t.saga); 
+
+    document.getElementById('currentTitle').textContent = `${t.index}. ${t.title}`;
+    document.getElementById('currentSaga').textContent = t.saga;
+    
+    LyricsManager.load(t.id);
+
+    const longName = `${t.title} [${t.id}]`;
+    audio.src = `Audio/${longName}.opus`;
+    albumCover.src = `Covers/${t.id}.jpg`;
+    
+    // Tema de Cores
+    const theme = themeBySaga[t.saga] || themeBySaga.Troy;
+    document.documentElement.style.setProperty('--accent', theme.accent);
+    // Mudança suave de cor de fundo
+    document.body.style.background = `radial-gradient(circle at center, ${theme.bg} 0%, #000 100%)`;
+    
+    handleStickers(t);
+
+    document.querySelectorAll('.track').forEach(d => d.classList.remove('active'));
+    const item = document.querySelector(`.track[data-index="${index}"]`);
+    if(item) {
+        item.classList.add('active');
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    vinylDisk.classList.remove('spinning');
+    updatePlayIcon(false);
+    progressSlider.value = 0;
 }
 
-.main-container { 
-    position: relative; 
-    z-index: 10; 
-    max-width: 1200px; 
-    margin: 0 auto; 
-    padding-bottom: 120px; 
-    animation: fadeIn 1s ease; 
+audio.addEventListener('error', (e) => {
+    const t = tracks[currentIndex];
+    const src = audio.src;
+    // Fallback simples para MP3 se OPUS falhar
+    if (src.includes(".opus")) {
+        const longName = `${t.title} [${t.id}]`;
+        audio.src = `Audio/${longName}.mp3`;
+        if(playBtn.dataset.playing === "true") audio.play();
+    }
+});
+
+function handleStickers(track) {
+    clearInterval(stickerInterval);
+    currentStickerIndex = 0;
+    const update = () => {
+        if(!track.stickers || track.stickers.length === 0) {
+            stickerChar.classList.add('hide'); return;
+        }
+        const num = track.stickers[currentStickerIndex];
+        const path = `Kaohto/Kaohto2023-${num}.webp`;
+        stickerChar.classList.add('hide');
+        setTimeout(() => {
+            stickerChar.src = path;
+            stickerChar.onload = () => stickerChar.classList.remove('hide');
+            stickerChar.onerror = () => { if(path.endsWith('.webp')) stickerChar.src = path.replace('.webp','.png'); }
+        }, 300);
+    };
+    update();
+    if (track.stickers && track.stickers.length > 1) {
+        stickerInterval = setInterval(() => {
+            currentStickerIndex = (currentStickerIndex + 1) % track.stickers.length;
+            update();
+        }, 8000);
+    }
 }
 
-/* === VINIL REALISTA === */
-.vinyl-disk {
-  width: 340px; height: 340px; 
-  border-radius: 50%; 
-  background: #101010; 
-  position: relative; 
-  box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-  z-index: 2;
-  border: 4px solid #050505;
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: spin 4s linear infinite; 
-  animation-play-state: paused;
-  margin: 0 auto;
-}
-.vinyl-disk.spinning { animation-play-state: running; }
-
-/* Ranhuras do disco (Listrinhas) */
-.vinyl-grooves { 
-    position: absolute; inset: 4px; border-radius: 50%;
-    background: repeating-radial-gradient(
-      #111 0, 
-      #111 2px, 
-      #222 3px, 
-      #181818 4px
-    );
-    z-index: 1;
-    box-shadow: inset 0 0 0 5px #050505;
+function togglePlay() {
+    if (audio.paused) {
+        audio.play().then(() => {
+            vinylDisk.classList.add('spinning');
+            updatePlayIcon(true);
+            playBtn.dataset.playing = "true";
+        }).catch(err => console.error(err));
+    } else {
+        audio.pause();
+        vinylDisk.classList.remove('spinning');
+        updatePlayIcon(false);
+        playBtn.dataset.playing = "false";
+    }
 }
 
-/* Brilho Cônico */
-.vinyl-shine {
-    position: absolute; inset: 0; border-radius: 50%;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        rgba(255,255,255,0.15) 70deg,
-        transparent 100deg,
-        transparent 180deg,
-        rgba(255,255,255,0.15) 250deg,
-        transparent 280deg
-    );
-    z-index: 2; pointer-events: none; filter: blur(8px); mix-blend-mode: overlay;
+function toggleShuffle() {
+    isShuffle = !isShuffle;
+    if (isShuffle) {
+        shuffleBtn.style.color = 'var(--accent)';
+        shuffleBtn.style.background = 'rgba(255,255,255,0.1)';
+    } else {
+        shuffleBtn.style.color = '#fff';
+        shuffleBtn.style.background = 'transparent';
+    }
 }
 
-.vinyl-label { 
-    position: absolute; inset: 0; margin: auto; 
-    width: 35%; height: 35%;
-    border-radius: 50%; overflow: hidden; 
-    border: 2px solid rgba(255,255,255,0.1); 
-    background: #333; z-index: 3;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-}
-.vinyl-label img { width: 100%; height: 100%; object-fit: cover; }
-
-.vinyl-hole { 
-    position: absolute; inset: 0; margin: auto; 
-    width: 12px; height: 12px; 
-    background: #000; border-radius: 50%; 
-    z-index: 10; border: 2px solid #222; 
+function updatePlayIcon(isPlaying) {
+    document.getElementById('iconPlay').style.display = isPlaying ? 'none' : 'block';
+    document.getElementById('iconPause').style.display = isPlaying ? 'block' : 'none';
 }
 
-/* === ANIMAÇÃO DA CONSTELAÇÃO (TROY) === */
-.constellation-svg {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%; height: 80%;
-    opacity: 0.6;
-    filter: drop-shadow(0 0 10px gold);
+function updateFavIcon(isFav) {
+    const icon = favBtn.querySelector('svg');
+    if(isFav) {
+        icon.setAttribute('fill', 'currentColor');
+        favBtn.style.color = 'var(--accent)';
+    } else {
+        icon.setAttribute('fill', 'none');
+        favBtn.style.color = '#fff';
+    }
 }
 
-.constellation-path {
-    fill: none;
-    stroke: gold;
-    stroke-width: 2;
-    stroke-linecap: round;
-    /* stroke-dasharray será definido via JS */
+volumeSlider.addEventListener('change', (e) => {
+    StatsManager.logVolume(tracks[currentIndex], e.target.value);
+});
+volumeSlider.addEventListener('input', (e) => {
+    audio.volume = e.target.value;
+});
+
+function changeTrack(offset) {
+    let next;
+    if (offset === 1 && isShuffle) {
+        do { next = Math.floor(Math.random() * tracks.length); } while (next === currentIndex && tracks.length > 1);
+    } else {
+        next = currentIndex + offset;
+        if(next >= tracks.length) next = 0;
+        if(next < 0) next = tracks.length - 1;
+    }
+    loadTrack(next);
+    setTimeout(togglePlay, 100); 
 }
 
-.star-point {
-    fill: white;
-    filter: blur(1px);
-    animation: twinkle 3s infinite ease-in-out;
-}
+audio.addEventListener('timeupdate', () => {
+    const cur = audio.currentTime;
+    if(audio.duration) {
+        const pct = (cur / audio.duration) * 100;
+        progressSlider.value = pct;
+        document.documentElement.style.setProperty('--progress-width', `${pct}%`);
+        document.getElementById('currentTime').textContent = formatTime(cur);
+        document.getElementById('totalTime').textContent = formatTime(audio.duration);
+        
+        // Atualizar Animação da Saga
+        BackgroundManager.updateAnimation(cur, audio.duration);
+    }
+    LyricsManager.sync(cur);
+});
 
-@keyframes twinkle { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+audio.addEventListener('ended', () => changeTrack(1));
+progressSlider.addEventListener('input', (e) => {
+    if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration;
+});
 
-/* === PAINEL DE LETRAS === */
-.lyrics-panel {
-    display: none; 
-    margin: 15px 0;
-    height: 140px; 
-    overflow-y: auto;
-    text-align: center;
-    position: relative;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
-    cursor: pointer;
-    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    scrollbar-width: none;
-}
-.lyrics-panel::-webkit-scrollbar { display: none; }
+const grid = document.getElementById('tracksGrid');
+tracks.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'track';
+    el.dataset.index = i;
+    el.innerHTML = `<div>${t.index}. ${t.title}</div><div class="t-meta">${t.saga}</div>`;
+    el.onclick = () => { loadTrack(i); setTimeout(togglePlay, 100); };
+    grid.appendChild(el);
+});
 
-body.lyrics-active .lyrics-panel { display: block; animation: slideOpen 0.3s ease; }
+playBtn.onclick = togglePlay;
+document.getElementById('nextBtn').onclick = () => changeTrack(1);
+document.getElementById('prevBtn').onclick = () => changeTrack(-1);
+document.getElementById('forwardBtn').onclick = () => { audio.currentTime += 10; };
+document.getElementById('rewindBtn').onclick = () => { audio.currentTime -= 10; };
 
-.lyrics-placeholder { padding-top: 60px; color: var(--muted); font-size: 0.9rem; font-style: italic; opacity: 0.7; }
-
-.l-line {
-    color: var(--muted); font-size: 0.95rem; padding: 6px 10px;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    opacity: 0.5; transform: scale(0.98); line-height: 1.4; cursor: pointer;
-}
-.l-line.active {
-    color: #fff; font-size: 1.2rem; font-weight: 800; opacity: 1;
-    text-shadow: 0 0 15px var(--accent); transform: scale(1.05);
-}
-
-@keyframes slideOpen { from { height: 0; opacity: 0; margin: 0; } to { height: 140px; opacity: 1; margin: 15px 0; } }
-
-/* === NOTIFICAÇÃO E MODAL === */
-.achievement-toast {
-    position: fixed; bottom: 30px; right: 30px;
-    background: rgba(20, 20, 20, 0.95);
-    border-left: 5px solid var(--accent);
-    color: #fff; padding: 15px 25px; border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 2000;
-    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 3.5s forwards;
-    display: flex; align-items: center; gap: 10px; font-size: 1rem;
-}
-@media (max-width: 600px) { .achievement-toast { bottom: 10px; right: 10px; left: 10px; justify-content: center; } }
-
-.modal {
-    position: fixed; inset: 0; z-index: 2100;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(12px);
-}
-.modal.show { opacity: 1; pointer-events: auto; }
-.modal-content {
-    background: linear-gradient(145deg, #151515, #0a0a0a);
-    padding: 40px; border-radius: 24px; width: 90%; max-width: 450px;
-    border: 1px solid rgba(255,255,255,0.1); text-align: center;
-    transform: scale(0.9); transition: transform 0.3s;
-}
-.modal.show .modal-content { transform: scale(1); }
-.modal h2 { color: var(--accent); margin-bottom: 30px; text-transform: uppercase; font-size: 1.4rem; }
-.stat-row { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; color: var(--muted); }
-.highlight { color: #fff; font-weight: 700; text-shadow: 0 0 10px var(--accent); }
-
-/* === INTRODUÇÃO === */
-.intro { 
-    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; 
-    z-index: 3000; background: radial-gradient(circle at center, rgba(45, 27, 20, 0.4) 0%, #000 100%);
-    backdrop-filter: blur(10px); transition: opacity 0.8s ease-out; 
-}
-.intro-card { 
-    padding: 60px 40px; text-align: center; width: 90%; max-width: 600px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(20, 10, 5, 0.6); border: 1px solid rgba(217, 119, 6, 0.3); 
-    border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-    animation: floatCard 6s ease-in-out infinite;
-}
-.intro h1 { 
-    font-size: clamp(2.5rem, 8vw, 5rem); margin-bottom: 10px; color: var(--accent); 
-    text-transform: uppercase; line-height: 1;
-    background: linear-gradient(to bottom, #fff7ed 0%, var(--accent) 70%, #7c2d12 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.intro-btn { 
-    border-radius: 50px !important; padding: 20px 50px !important; font-weight: 800; text-transform: uppercase;
-    background: linear-gradient(180deg, rgba(217, 119, 6, 0.2) 0%, rgba(0,0,0,0.8) 100%);
-    color: #fff; margin-top: 30px; width: auto !important; height: auto !important; cursor: pointer; border: 1px solid var(--accent);
-}
-
-/* === LAYOUT & CONTROLES === */
-.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; padding: 40px; margin: 40px 20px; align-items: center; }
-.nowplaying { padding: 30px; margin-top: 30px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
-.np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.np-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
-.saga-badge { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.1); }
-
-.timeline-container { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; }
-#progressSlider { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; background-image: linear-gradient(to right, var(--accent) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); }
-
-.controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-.main-controls { display: flex; gap: 18px; align-items: center; justify-content: center; flex: 1; }
-.volume-control { display: flex; align-items: center; gap: 10px; width: 130px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 30px; }
-
-.hero-player { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
-.player-scene { position: relative; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center; }
-.character-popup { 
-    position: absolute; bottom: -30px; right: -70px; height: 300px; width: auto; 
-    filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; 
-    transition: all 0.6s; transform-origin: bottom center; 
-}
-.character-popup.hide { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-10deg); filter: blur(10px); }
-
-.tracks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 40px; padding: 0 20px; }
-.track { padding: 18px; border-radius: 14px; background: rgba(20, 20, 20, 0.6); border: 1px solid transparent; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-.track:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
-.track.active { background: var(--accent); color: #000; font-weight: 800; box-shadow: 0 0 30px var(--accent); }
-
-/* === MOBILE === */
-@media (max-width: 950px) {
-    .hero { display: flex; flex-direction: column; text-align: center; padding: 20px; gap: 40px; margin: 10px; }
-    .hero-player { width: 100%; order: -1; transform: scale(0.9); }
-    .player-scene { width: 300px; height: 300px; }
-    .vinyl-disk { width: 280px; height: 280px; }
-    .character-popup { height: 200px; right: -20px; bottom: -20px; }
-    .controls-row { justify-content: center; flex-direction: column; }
-    .volume-control { width: 100%; max-width: 300px; }
-    .hero-text { width: 100%; }
-    .np-title { font-size: 1.2rem; }
-}
-
-@media (max-width: 480px) {
-    .intro h1 { font-size: 3rem; }
-    .main-controls { gap: 10px; }
-    .btn.primary { width: 60px; height: 60px; }
-    .btn.icon-btn { width: 40px; height: 40px; }
-    .intro-btn { min-width: unset; width: 100% !important; }
-}
-
-.glass { background: var(--glass); backdrop-filter: blur(24px); border: 1px solid var(--stroke); border-radius: var(--radius); }
-.btn { cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-.btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); border-color: var(--accent); }
-.icon-btn { width: 44px; height: 44px; padding: 10px; }
-.small-btn { width: 38px; height: 38px; padding: 8px; }
-.primary { background: var(--accent); border: none; color: #000; width: 72px; height: 72px; box-shadow: 0 0 30px var(--accent); }
-.primary svg { width: 32px; height: 32px; }
-
-@keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-@keyframes spin { 100% { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-/* === SAGA CYCLOPS: O OLHO === */
-#saga-cyclops {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle, #2a0505 0%, #000 70%);
-    animation: fadeInRed 2s ease;
-}
-
-.eye-container {
-    position: relative; width: 300px; height: 300px;
-    display: flex; align-items: center; justify-content: center;
-}
-
-.eye-shape {
-    width: 0; height: 0; /* Começa fechado */
-    background: #000;
-    border-radius: 50%;
-    position: relative;
-    box-shadow: 0 0 60px rgba(255, 0, 0, 0.2);
-    animation: openEye 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    overflow: hidden;
-    border: 2px solid rgba(139, 0, 0, 0.5);
-}
-
-.eye-iris {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60%; height: 60%;
-    background: radial-gradient(circle, #ff4444 0%, #8b0000 70%, #000 100%);
-    border-radius: 50%;
-    box-shadow: inset 0 0 20px #000;
-}
-
-.eye-pupil {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30%; height: 100%; /* Pupila de fenda (gato/reptil) */
-    background: #000;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-}
-
-.eye-glow {
-    position: absolute; inset: -50px;
-    background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
-    animation: pulseRed 3s infinite alternate;
-    z-index: -1;
-}
-
-@keyframes openEye {
-    0% { width: 0; height: 0; opacity: 0; }
-    50% { width: 280px; height: 10px; opacity: 1; } /* Abre como fenda */
-    100% { width: 280px; height: 280px; } /* Abre total */
-}
-
-@keyframes pulseRed { 0% { opacity: 0.3; transform: scale(1); } 100% { opacity: 0.8; transform: scale(1.2); } }
-
-/* === SAGA UNDERWORLD: O RIO ESTIGE 3D === */
-#saga-underworld {
-    position: absolute; inset: 0; overflow: hidden;
-    background: #050505;
-}
-
-.styx-scene {
-    position: absolute; width: 100%; height: 100%;
-    perspective: 800px; /* Cria a profundidade 3D */
-    overflow: hidden;
-}
-
-/* O Rio é um plano inclinado */
-.styx-river {
-    position: absolute;
-    left: -50%; width: 200%; height: 200%;
-    top: 50%;
-    background: repeating-linear-gradient(
-        180deg,
-        #0a0a1a 0%,
-        #11112b 20%,
-        #050510 40%
-    );
-    transform-origin: 50% 0;
-    transform: rotateX(70deg) translateY(-50px); /* Inclina para parecer água fluindo para o fundo */
-    box-shadow: inset 0 0 100px #000;
-    animation: riverFlow 10s linear infinite;
-    opacity: 0.6;
-}
-
-.styx-fog {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-    background: linear-gradient(to top, #000 10%, transparent 100%);
-    pointer-events: none; z-index: 5;
-}
-
-/* Canvas fica por cima do rio 3D para desenhar o barco e as almas */
-#underworldCanvas {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 2; pointer-events: none;
-}
-
-@keyframes riverFlow {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 500px; } /* Move a textura para parecer fluxo */
+function formatTime(s) {
+    if(isNaN(s)) return "00:00";
+    const m = Math.floor(s/60);
+    const sec = Math.floor(s%60);
+    return `${m}:${sec<10?'0'+sec:sec}`;
 }
