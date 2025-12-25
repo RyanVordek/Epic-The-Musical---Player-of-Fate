@@ -384,6 +384,10 @@ function loadTrack(index) {
     vinylDisk.classList.remove('spinning');
     updatePlayIcon(false);
     progressSlider.value = 0;
+    // Update Media Session with track information
+  if (window.updateMediaSession) {
+    window.updateMediaSession(t);
+  }
 }
 
 audio.addEventListener('error', (e) => {
@@ -393,6 +397,7 @@ audio.addEventListener('error', (e) => {
         const longName = `${t.title} [${t.id}]`;
         audio.src = `Audio/${longName}.mp3`;
         if(playBtn.dataset.playing === "true") audio.play();
+            if (window.updateMediaSessionPlayState) window.updateMediaSessionPlayState(true);
     } else if (src.includes(".mp3")) {
          audio.src = `Audio/${t.id}.opus`;
     }
@@ -449,6 +454,10 @@ function toggleShuffle() {
         shuffleBtn.style.background = 'transparent';
         shuffleBtn.querySelector('svg').setAttribute('stroke-width', '2');
     }
+  // Update Media Session play state
+  if (window.updateMediaSessionPlayState) {
+    window.updateMediaSessionPlayState(!audio.paused);
+  }
 }
 
 function updatePlayIcon(isPlaying) {
