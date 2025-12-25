@@ -1,6 +1,6 @@
-/* ========= EPIC Player - Ultimate Edition (Mobile & Sagas) ========== */
+/* ========= EPIC Player - Ultimate Edition (Lógica Corrigida) ========== */
 
-// --- CONFIGURAÇÃO DE TEMAS ---
+/* --- CONFIGURAÇÃO DE TEMAS --- */
 const themeBySaga = {
     Troy:       { bg: "#2d1b14", accent: "#fbbf24" },
     Cyclops:    { bg: "#450a0a", accent: "#ef4444" },
@@ -167,27 +167,42 @@ const BackgroundManager = {
         if(this.troySvg) this.troySvg.style.display = 'none';
         document.getElementById('waterCanvas').style.display = 'none';
         
+        const cyclops = document.getElementById('saga-cyclops');
+        const underworld = document.getElementById('saga-underworld');
+        
+        if(cyclops) cyclops.style.display = 'none';
+        if(underworld) underworld.style.display = 'none';
+        
         // 2. Ativar Específico
         switch(sagaName) {
             case 'Troy':
                 if(this.troySvg) {
                     this.troySvg.style.display = 'block';
-                    // Resetar animação
                     this.troyPath.style.strokeDashoffset = this.pathLength;
                 }
                 break;
-                
-            case 'Ocean':
             case 'Cyclops':
-            case 'Vengeance': // Adicionado Vengeance para água também
+                if(cyclops) {
+                    cyclops.style.display = 'flex';
+                    const eye = cyclops.querySelector('.eye-shape');
+                    if(eye) {
+                         eye.style.animation = 'none';
+                         eye.offsetHeight; /* trigger reflow */
+                         eye.style.animation = 'openEye 3s forwards';
+                    }
+                }
+                break;
+            case 'Ocean':
+            case 'Vengeance':
                 if(this.waterRenderer) {
                     this.waterRenderer.active = true;
                     document.getElementById('waterCanvas').style.display = 'block';
                 }
                 break;
-                
-            default:
-                // Sagas sem efeito especial usam apenas a cor de fundo do CSS
+            case 'Underworld':
+                if(underworld) {
+                    underworld.style.display = 'block';
+                }
                 break;
         }
     },
@@ -196,7 +211,7 @@ const BackgroundManager = {
         if (!duration) return;
         const progress = currentTime / duration;
         
-        // Animação Troia: Desenhar constelação
+        // Animação Troia
         if (this.currentSaga === 'Troy' && this.troyPath) {
             const drawLength = this.pathLength * progress;
             this.troyPath.style.strokeDashoffset = this.pathLength - drawLength;
@@ -219,12 +234,11 @@ class RippleRenderer {
         this.resize();
         window.addEventListener('resize', () => this.resize());
         
-        // Criar gotas aleatórias
         setInterval(() => {
             if (this.active && !document.hidden) {
                 this.addRipple(Math.random()*this.width, Math.random()*this.height);
             }
-        }, 400); // Menos frequente para economizar mobile
+        }, 400); 
         
         this.loop();
     }
@@ -247,8 +261,6 @@ class RippleRenderer {
         }
 
         this.ctx.clearRect(0,0, this.width, this.height);
-        
-        // Cor da água baseada na saga (levemente azulada)
         this.ctx.fillStyle = "rgba(8, 47, 73, 0.1)"; 
         this.ctx.fillRect(0,0, this.width, this.height);
         
@@ -301,12 +313,15 @@ const LyricsManager = {
     },
     
     load(trackId) {
-        if (typeof LYRICS_DB === 'undefined' || !LYRICS_DB[trackId]) {
-            this.content.innerHTML = '<div class="lyrics-placeholder">...</div>';
+        // Se a variável LYRICS_DB não existir, cria um vazio para não dar erro
+        const db = (typeof LYRICS_DB !== 'undefined') ? LYRICS_DB : {};
+        
+        if (!db[trackId]) {
+            this.content.innerHTML = '<div class="lyrics-placeholder">Letra não disponível...</div>';
             this.currentLines = [];
             return;
         }
-        this.currentLines = LYRICS_DB[trackId];
+        this.currentLines = db[trackId];
         let html = '';
         this.currentLines.forEach((line, index) => {
             html += `<p class="l-line" data-idx="${index}">${line.text}</p>`;
@@ -334,35 +349,51 @@ const LyricsManager = {
 };
 
 /* =================================================================
-   5. PLAYER CORE
+   5. PLAYER CORE & CONTROLES
    ================================================================= */
+// Variáveis Globais
 let currentIndex = 0;
 let stickerInterval = null;
 let currentStickerIndex = 0;
 let isShuffle = false;
+let isLoop = false;
 
-const audio = document.getElementById('audioEl');
-const playBtn = document.getElementById('playPauseBtn');
-const shuffleBtn = document.getElementById('shuffleBtn');
-const favBtn = document.getElementById('favBtn');
-const vinylDisk = document.getElementById('vinylDisk');
-const albumCover = document.getElementById('albumCover');
-const stickerChar = document.getElementById('stickerCharacter');
-const progressSlider = document.getElementById('progressSlider');
-const volumeSlider = document.getElementById('volumeSlider');
+// Elementos do DOM (capturados no init)
+let audio, playBtn, shuffleBtn, loopBtn, favBtn, vinylDisk, albumCover, stickerChar, progressSlider, volumeSlider;
 
 function init() {
+    // Captura elementos
+    audio = document.getElementById('audioEl');
+    playBtn = document.getElementById('playPauseBtn');
+    shuffleBtn = document.getElementById('shuffleBtn');
+    loopBtn = document.getElementById('loopBtn');
+    favBtn = document.getElementById('favBtn');
+    vinylDisk = document.getElementById('vinylDisk');
+    albumCover = document.getElementById('albumCover');
+    stickerChar = document.getElementById('stickerCharacter');
+    progressSlider = document.getElementById('progressSlider');
+    volumeSlider = document.getElementById('volumeSlider');
+    
+    // Inicializa subsistemas
     StatsManager.load();
     BackgroundManager.init();
     LyricsManager.init();
     
-    document.getElementById('intro').style.opacity = '0';
-    setTimeout(() => {
-        document.getElementById('intro').style.display = 'none';
-        document.getElementById('mainContent').hidden = false;
-        loadTrack(0);
-    }, 500);
+    // Configura botões principais
+    playBtn.onclick = togglePlay;
+    document.getElementById('nextBtn').onclick = () => changeTrack(1);
+    document.getElementById('prevBtn').onclick = () => changeTrack(-1);
+    
+    shuffleBtn.onclick = toggleShuffle;
+    loopBtn.onclick = toggleLoop;
+    
+    favBtn.onclick = () => {
+        const t = tracks[currentIndex];
+        const isFav = StatsManager.toggleFavorite(t);
+        updateFavIcon(isFav);
+    };
 
+    // Configura Stats Modal
     document.getElementById('statsBtn').onclick = () => {
         StatsManager.updateUI();
         document.getElementById('statsModal').classList.add('show');
@@ -371,14 +402,35 @@ function init() {
         document.getElementById('statsModal').classList.remove('show');
     };
     
-    favBtn.onclick = () => {
-        const t = tracks[currentIndex];
-        const isFav = StatsManager.toggleFavorite(t);
-        updateFavIcon(isFav);
-    };
-    shuffleBtn.onclick = toggleShuffle;
+    // Sliders
+    volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
+    volumeSlider.addEventListener('change', (e) => { StatsManager.logVolume(tracks[currentIndex], e.target.value); });
+
+    progressSlider.addEventListener('input', (e) => {
+        if(audio.duration) {
+            const time = (e.target.value / 100) * audio.duration;
+            audio.currentTime = time;
+        }
+    });
+
+    // Eventos de Áudio
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', onTrackEnded);
+    audio.addEventListener('error', onAudioError);
+    
+    // Renderiza a lista de músicas
+    renderTrackList();
+
+    // Transição da Intro
+    document.getElementById('intro').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('mainContent').hidden = false;
+        loadTrack(0); // Carrega a primeira música
+    }, 500);
 }
 
+// Expõe a função para o botão da Intro no HTML
 window.startExperience = init;
 
 function loadTrack(index) {
@@ -386,72 +438,95 @@ function loadTrack(index) {
     currentIndex = index;
     const t = tracks[index];
 
+    // Log e UI
     StatsManager.logPlay(t);
     updateFavIcon(StatsManager.isFavorite(t.id));
-    BackgroundManager.setSaga(t.saga); // Ativar fundo da saga
+    BackgroundManager.setSaga(t.saga);
+    LyricsManager.load(t.id);
 
     document.getElementById('currentTitle').textContent = `${t.index}. ${t.title}`;
     document.getElementById('currentSaga').textContent = t.saga;
     
-    LyricsManager.load(t.id);
-
+    // Carregamento de Arquivos
+    // OBS: Certifique-se que os arquivos estão na pasta 'Audio' e 'Covers'
     const longName = `${t.title} [${t.id}]`;
-    audio.src = `Audio/${longName}.opus`;
+    audio.src = `Audio/${longName}.opus`; // Tenta opus primeiro
     albumCover.src = `Covers/${t.id}.jpg`;
     
-    // Tema de Cores
+    // Tema e Cores
     const theme = themeBySaga[t.saga] || themeBySaga.Troy;
     document.documentElement.style.setProperty('--accent', theme.accent);
-    // Mudança suave de cor de fundo
     document.body.style.background = `radial-gradient(circle at center, ${theme.bg} 0%, #000 100%)`;
     
+    // Stickers e Lista
     handleStickers(t);
+    highlightTrackInList(index);
+    
+    // Reset visual
+    vinylDisk.classList.remove('spinning');
+    updatePlayIcon(false);
+    playBtn.dataset.playing = "false";
+    progressSlider.value = 0;
+}
 
+function renderTrackList() {
+    const grid = document.getElementById('tracksGrid');
+    grid.innerHTML = ''; // Limpa antes de renderizar
+    tracks.forEach((t, i) => {
+        const el = document.createElement('div');
+        el.className = 'track';
+        el.dataset.index = i;
+        el.innerHTML = `<div>${t.index}. ${t.title}</div><div style="font-size:0.8rem; opacity:0.7;">${t.saga}</div>`;
+        el.onclick = () => { 
+            loadTrack(i); 
+            setTimeout(() => { 
+                audio.play(); 
+                vinylDisk.classList.add('spinning');
+                updatePlayIcon(true);
+            }, 100); 
+        };
+        grid.appendChild(el);
+    });
+}
+
+function highlightTrackInList(index) {
     document.querySelectorAll('.track').forEach(d => d.classList.remove('active'));
     const item = document.querySelector(`.track[data-index="${index}"]`);
     if(item) {
         item.classList.add('active');
         item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    
-    vinylDisk.classList.remove('spinning');
-    updatePlayIcon(false);
-    progressSlider.value = 0;
 }
-
-audio.addEventListener('error', (e) => {
-    const t = tracks[currentIndex];
-    const src = audio.src;
-    // Fallback simples para MP3 se OPUS falhar
-    if (src.includes(".opus")) {
-        const longName = `${t.title} [${t.id}]`;
-        audio.src = `Audio/${longName}.mp3`;
-        if(playBtn.dataset.playing === "true") audio.play();
-    }
-});
 
 function handleStickers(track) {
     clearInterval(stickerInterval);
     currentStickerIndex = 0;
+    
     const update = () => {
         if(!track.stickers || track.stickers.length === 0) {
             stickerChar.classList.add('hide'); return;
         }
         const num = track.stickers[currentStickerIndex];
         const path = `Kaohto/Kaohto2023-${num}.webp`;
+        
         stickerChar.classList.add('hide');
         setTimeout(() => {
             stickerChar.src = path;
             stickerChar.onload = () => stickerChar.classList.remove('hide');
-            stickerChar.onerror = () => { if(path.endsWith('.webp')) stickerChar.src = path.replace('.webp','.png'); }
+            // Fallback para PNG se WebP não existir
+            stickerChar.onerror = () => { 
+                if(path.endsWith('.webp')) stickerChar.src = path.replace('.webp','.png'); 
+            };
         }, 300);
     };
+    
     update();
+    
     if (track.stickers && track.stickers.length > 1) {
         stickerInterval = setInterval(() => {
             currentStickerIndex = (currentStickerIndex + 1) % track.stickers.length;
             update();
-        }, 8000);
+        }, 8000); // Muda o sticker a cada 8 segundos
     }
 }
 
@@ -461,7 +536,7 @@ function togglePlay() {
             vinylDisk.classList.add('spinning');
             updatePlayIcon(true);
             playBtn.dataset.playing = "true";
-        }).catch(err => console.error(err));
+        }).catch(err => console.error("Erro ao reproduzir:", err));
     } else {
         audio.pause();
         vinylDisk.classList.remove('spinning');
@@ -472,12 +547,73 @@ function togglePlay() {
 
 function toggleShuffle() {
     isShuffle = !isShuffle;
-    if (isShuffle) {
-        shuffleBtn.style.color = 'var(--accent)';
-        shuffleBtn.style.background = 'rgba(255,255,255,0.1)';
+    shuffleBtn.style.color = isShuffle ? 'var(--accent)' : '#fff';
+    shuffleBtn.style.background = isShuffle ? 'rgba(255,255,255,0.1)' : 'transparent';
+}
+
+function toggleLoop() {
+    isLoop = !isLoop;
+    audio.loop = isLoop;
+    loopBtn.style.color = isLoop ? 'var(--accent)' : '#fff';
+    // Se o loop estiver ativo, remove o evento de 'ended' que troca de música
+    if(isLoop) {
+        audio.removeEventListener('ended', onTrackEnded);
     } else {
-        shuffleBtn.style.color = '#fff';
-        shuffleBtn.style.background = 'transparent';
+        audio.addEventListener('ended', onTrackEnded);
+    }
+}
+
+function changeTrack(offset) {
+    let next;
+    if (offset === 1 && isShuffle) {
+        // Lógica de Shuffle
+        do { 
+            next = Math.floor(Math.random() * tracks.length); 
+        } while (next === currentIndex && tracks.length > 1);
+    } else {
+        // Sequencial
+        next = currentIndex + offset;
+        if(next >= tracks.length) next = 0;
+        if(next < 0) next = tracks.length - 1;
+    }
+    loadTrack(next);
+    setTimeout(() => {
+        audio.play();
+        vinylDisk.classList.add('spinning');
+        updatePlayIcon(true);
+    }, 100); 
+}
+
+function updateProgress() {
+    const cur = audio.currentTime;
+    if(audio.duration) {
+        const pct = (cur / audio.duration) * 100;
+        progressSlider.value = pct;
+        document.documentElement.style.setProperty('--progress-width', `${pct}%`);
+        
+        document.getElementById('currentTime').textContent = formatTime(cur);
+        document.getElementById('totalTime').textContent = formatTime(audio.duration);
+        
+        BackgroundManager.updateAnimation(cur, audio.duration);
+    }
+    LyricsManager.sync(cur);
+}
+
+function onTrackEnded() {
+    if(!isLoop) changeTrack(1);
+}
+
+function onAudioError() {
+    const t = tracks[currentIndex];
+    const src = audio.src;
+    console.warn("Erro ao carregar:", src);
+    
+    // Fallback: Se falhar .opus, tenta .mp3
+    if (src.includes(".opus")) {
+        console.log("Tentando fallback para MP3...");
+        const longName = `${t.title} [${t.id}]`;
+        audio.src = `Audio/${longName}.mp3`;
+        audio.play();
     }
 }
 
@@ -496,62 +632,6 @@ function updateFavIcon(isFav) {
         favBtn.style.color = '#fff';
     }
 }
-
-volumeSlider.addEventListener('change', (e) => {
-    StatsManager.logVolume(tracks[currentIndex], e.target.value);
-});
-volumeSlider.addEventListener('input', (e) => {
-    audio.volume = e.target.value;
-});
-
-function changeTrack(offset) {
-    let next;
-    if (offset === 1 && isShuffle) {
-        do { next = Math.floor(Math.random() * tracks.length); } while (next === currentIndex && tracks.length > 1);
-    } else {
-        next = currentIndex + offset;
-        if(next >= tracks.length) next = 0;
-        if(next < 0) next = tracks.length - 1;
-    }
-    loadTrack(next);
-    setTimeout(togglePlay, 100); 
-}
-
-audio.addEventListener('timeupdate', () => {
-    const cur = audio.currentTime;
-    if(audio.duration) {
-        const pct = (cur / audio.duration) * 100;
-        progressSlider.value = pct;
-        document.documentElement.style.setProperty('--progress-width', `${pct}%`);
-        document.getElementById('currentTime').textContent = formatTime(cur);
-        document.getElementById('totalTime').textContent = formatTime(audio.duration);
-        
-        // Atualizar Animação da Saga
-        BackgroundManager.updateAnimation(cur, audio.duration);
-    }
-    LyricsManager.sync(cur);
-});
-
-audio.addEventListener('ended', () => changeTrack(1));
-progressSlider.addEventListener('input', (e) => {
-    if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration;
-});
-
-const grid = document.getElementById('tracksGrid');
-tracks.forEach((t, i) => {
-    const el = document.createElement('div');
-    el.className = 'track';
-    el.dataset.index = i;
-    el.innerHTML = `<div>${t.index}. ${t.title}</div><div class="t-meta">${t.saga}</div>`;
-    el.onclick = () => { loadTrack(i); setTimeout(togglePlay, 100); };
-    grid.appendChild(el);
-});
-
-playBtn.onclick = togglePlay;
-document.getElementById('nextBtn').onclick = () => changeTrack(1);
-document.getElementById('prevBtn').onclick = () => changeTrack(-1);
-document.getElementById('forwardBtn').onclick = () => { audio.currentTime += 10; };
-document.getElementById('rewindBtn').onclick = () => { audio.currentTime -= 10; };
 
 function formatTime(s) {
     if(isNaN(s)) return "00:00";
