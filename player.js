@@ -1,4 +1,4 @@
-/* ========= EPIC Player - Ultimate Edition (Lógica Corrigida) ========== */
+/* ========= EPIC Player - Ultimate Edition (Final Logic) ========== */
 
 /* --- CONFIGURAÇÃO DE TEMAS --- */
 const themeBySaga = {
@@ -61,11 +61,13 @@ const tracks = [
    1. SISTEMA DE STATS & CONQUISTAS
    ================================================================= */
 const AchievementList = [
-    { id: 'first_play', name: "O Início", desc: "Ouviu a primeira música.", check: (s) => s.totalPlays >= 1 },
-    { id: 'fan_10', name: "Fã Dedicado", desc: "Ouviu 10 músicas.", check: (s) => s.totalPlays >= 10 },
-    { id: 'fan_50', name: "Viciado", desc: "Ouviu 50 músicas.", check: (s) => s.totalPlays >= 50 },
-    { id: 'lover', name: "Amado", desc: "Favoritou 3 músicas.", check: (s) => s.favCount >= 3 },
-    { id: 'max_vol', name: "No Talo", desc: "Colocou o volume no máximo.", check: (s, track, vol) => vol >= 1 }
+    { id: 'first_play', name: "O Início", desc: "Ouça a primeira música.", check: (s) => s.totalPlays >= 1 },
+    { id: 'fan_10', name: "Fã Dedicado", desc: "Ouça 10 músicas.", check: (s) => s.totalPlays >= 10 },
+    { id: 'fan_50', name: "Viciado", desc: "Ouça 50 músicas.", check: (s) => s.totalPlays >= 50 },
+    { id: 'lover', name: "Amado", desc: "Favorite 3 músicas.", check: (s) => s.favCount >= 3 },
+    { id: 'max_vol', name: "No Talo", desc: "Volume máximo.", check: (s, track, vol) => vol >= 1 },
+    { id: 'troy_fan', name: "Guerreiro de Troia", desc: "Ouça 'The Horse and the Infant'.", check: (s, track) => track && track.saga === 'Troy' },
+    { id: 'underworld_traveler', name: "Viajante do Submundo", desc: "Visite o Submundo.", check: (s, track) => track && track.saga === 'Underworld' }
 ];
 
 const StatsManager = {
@@ -127,6 +129,7 @@ const StatsManager = {
     isFavorite(id) { return localStorage.getItem('fav_' + id) === 'true'; },
 
     updateUI() {
+        // Stats Texto
         let mostPlayed = { id: null, count: 0 };
         for(let id in this.data.plays) {
             if(this.data.plays[id] > mostPlayed.count) mostPlayed = { id, count: this.data.plays[id] };
@@ -135,12 +138,28 @@ const StatsManager = {
         const mostPlayedText = track ? `${track.title} (${mostPlayed.count}x)` : "Nenhuma";
         document.getElementById('statMostPlayed').textContent = mostPlayedText;
         document.getElementById('statTotalPlays').textContent = this.data.totalPlays;
-        document.getElementById('statBadges').textContent = `${this.data.achievements.length} Desbloqueadas`;
+        document.getElementById('statBadges').textContent = `${this.data.achievements.length} / ${AchievementList.length}`;
+
+        // Renderizar Grade de Conquistas
+        const grid = document.getElementById('achievementsGrid');
+        if(grid) {
+            grid.innerHTML = '';
+            AchievementList.forEach(ach => {
+                const unlocked = this.data.achievements.includes(ach.id);
+                const card = document.createElement('div');
+                card.className = `ach-card ${unlocked ? 'unlocked' : 'locked'}`;
+                card.innerHTML = `
+                    <div class="ach-title">${unlocked ? '🏆' : '🔒'} ${ach.name}</div>
+                    <div class="ach-desc">${ach.desc}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
     }
 };
 
 /* =================================================================
-   2. GERENCIADOR DE FUNDOS (EFEITOS VISUAIS)
+   2. GERENCIADOR DE FUNDOS
    ================================================================= */
 const BackgroundManager = {
     currentSaga: null,
@@ -150,8 +169,6 @@ const BackgroundManager = {
         this.waterRenderer = new RippleRenderer();
         this.troySvg = document.getElementById('saga-troy');
         this.troyPath = document.getElementById('horsePath');
-        
-        // Preparar caminho SVG de Troia
         if(this.troyPath) {
             this.pathLength = this.troyPath.getTotalLength();
             this.troyPath.style.strokeDasharray = this.pathLength;
@@ -161,48 +178,32 @@ const BackgroundManager = {
     
     setSaga(sagaName) {
         this.currentSaga = sagaName;
-        
-        // 1. Resetar tudo
         if(this.waterRenderer) this.waterRenderer.active = false;
         if(this.troySvg) this.troySvg.style.display = 'none';
         document.getElementById('waterCanvas').style.display = 'none';
         
         const cyclops = document.getElementById('saga-cyclops');
         const underworld = document.getElementById('saga-underworld');
-        
         if(cyclops) cyclops.style.display = 'none';
         if(underworld) underworld.style.display = 'none';
         
-        // 2. Ativar Específico
         switch(sagaName) {
             case 'Troy':
-                if(this.troySvg) {
-                    this.troySvg.style.display = 'block';
-                    this.troyPath.style.strokeDashoffset = this.pathLength;
-                }
+                if(this.troySvg) { this.troySvg.style.display = 'block'; this.troyPath.style.strokeDashoffset = this.pathLength; }
                 break;
             case 'Cyclops':
                 if(cyclops) {
                     cyclops.style.display = 'flex';
                     const eye = cyclops.querySelector('.eye-shape');
-                    if(eye) {
-                         eye.style.animation = 'none';
-                         eye.offsetHeight; /* trigger reflow */
-                         eye.style.animation = 'openEye 3s forwards';
-                    }
+                    if(eye) { eye.style.animation = 'none'; eye.offsetHeight; eye.style.animation = 'openEye 3s forwards'; }
                 }
                 break;
             case 'Ocean':
             case 'Vengeance':
-                if(this.waterRenderer) {
-                    this.waterRenderer.active = true;
-                    document.getElementById('waterCanvas').style.display = 'block';
-                }
+                if(this.waterRenderer) { this.waterRenderer.active = true; document.getElementById('waterCanvas').style.display = 'block'; }
                 break;
             case 'Underworld':
-                if(underworld) {
-                    underworld.style.display = 'block';
-                }
+                if(underworld) underworld.style.display = 'block';
                 break;
         }
     },
@@ -210,8 +211,6 @@ const BackgroundManager = {
     updateAnimation(currentTime, duration) {
         if (!duration) return;
         const progress = currentTime / duration;
-        
-        // Animação Troia
         if (this.currentSaga === 'Troy' && this.troyPath) {
             const drawLength = this.pathLength * progress;
             this.troyPath.style.strokeDashoffset = this.pathLength - drawLength;
@@ -220,62 +219,30 @@ const BackgroundManager = {
 };
 
 /* =================================================================
-   3. EFEITO DE ÁGUA (OTIMIZADO)
+   3. EFEITO DE ÁGUA
    ================================================================= */
 class RippleRenderer {
     constructor() {
         this.canvas = document.getElementById('waterCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.ripples = [];
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
         this.active = false;
-        
         this.resize();
         window.addEventListener('resize', () => this.resize());
-        
-        setInterval(() => {
-            if (this.active && !document.hidden) {
-                this.addRipple(Math.random()*this.width, Math.random()*this.height);
-            }
-        }, 400); 
-        
+        setInterval(() => { if (this.active && !document.hidden) this.addRipple(Math.random()*this.width, Math.random()*this.height); }, 400); 
         this.loop();
     }
-    
-    resize() {
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-    }
-    
-    addRipple(x, y) {
-        this.ripples.push({x, y, age: 0, size: 2, power: 1.0});
-    }
-    
+    resize() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; }
+    addRipple(x, y) { this.ripples.push({x, y, age: 0, size: 2, power: 1.0}); }
     loop() {
-        if (!this.active || document.hidden) {
-            requestAnimationFrame(() => this.loop());
-            return;
-        }
-
+        if (!this.active || document.hidden) { requestAnimationFrame(() => this.loop()); return; }
         this.ctx.clearRect(0,0, this.width, this.height);
         this.ctx.fillStyle = "rgba(8, 47, 73, 0.1)"; 
         this.ctx.fillRect(0,0, this.width, this.height);
-        
         for(let i=0; i<this.ripples.length; i++) {
             let r = this.ripples[i];
-            r.age++;
-            r.size += 1.5; 
-            r.power -= 0.01;
-            
-            if(r.power <= 0) {
-                this.ripples.splice(i, 1);
-                i--;
-                continue;
-            }
-            
+            r.age++; r.size += 1.5; r.power -= 0.01;
+            if(r.power <= 0) { this.ripples.splice(i, 1); i--; continue; }
             this.ctx.beginPath();
             this.ctx.ellipse(r.x, r.y, r.size, r.size * 0.5, 0, 0, Math.PI * 2);
             this.ctx.lineWidth = 2;
@@ -292,14 +259,12 @@ class RippleRenderer {
 const LyricsManager = {
     isEnabled: false,
     currentLines: [],
-    
     init() {
         this.content = document.getElementById('lyricsContent');
         this.btn = document.getElementById('lyricsBtn');
         if(this.btn) this.btn.onclick = () => this.toggle();
         if(this.content) this.content.onclick = () => { if(this.isEnabled) this.toggle(); };
     },
-    
     toggle() {
         this.isEnabled = !this.isEnabled;
         if(this.isEnabled) {
@@ -311,39 +276,23 @@ const LyricsManager = {
             this.btn.style.color = '#fff';
         }
     },
-    
     load(trackId) {
-        // Se a variável LYRICS_DB não existir, cria um vazio para não dar erro
         const db = (typeof LYRICS_DB !== 'undefined') ? LYRICS_DB : {};
-        
-        if (!db[trackId]) {
-            this.content.innerHTML = '<div class="lyrics-placeholder">Letra não disponível...</div>';
-            this.currentLines = [];
-            return;
-        }
+        if (!db[trackId]) { this.content.innerHTML = '<div class="lyrics-placeholder">Letra não disponível...</div>'; this.currentLines = []; return; }
         this.currentLines = db[trackId];
         let html = '';
-        this.currentLines.forEach((line, index) => {
-            html += `<p class="l-line" data-idx="${index}">${line.text}</p>`;
-        });
+        this.currentLines.forEach((line, index) => { html += `<p class="l-line" data-idx="${index}">${line.text}</p>`; });
         this.content.innerHTML = html;
     },
-    
     sync(currentTime) {
         if (!this.isEnabled || !this.currentLines.length) return;
         let activeIdx = -1;
-        for (let i = 0; i < this.currentLines.length; i++) {
-            if (currentTime >= this.currentLines[i].time) activeIdx = i;
-            else break;
-        }
+        for (let i = 0; i < this.currentLines.length; i++) { if (currentTime >= this.currentLines[i].time) activeIdx = i; else break; }
         if (activeIdx !== -1) {
             const old = this.content.querySelector('.l-line.active');
             if(old) old.classList.remove('active');
             const currentEl = this.content.querySelector(`.l-line[data-idx="${activeIdx}"]`);
-            if (currentEl) {
-                currentEl.classList.add('active');
-                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            if (currentEl) { currentEl.classList.add('active'); currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         }
     }
 };
@@ -351,18 +300,14 @@ const LyricsManager = {
 /* =================================================================
    5. PLAYER CORE & CONTROLES
    ================================================================= */
-// Variáveis Globais
 let currentIndex = 0;
 let stickerInterval = null;
 let currentStickerIndex = 0;
 let isShuffle = false;
 let isLoop = false;
-
-// Elementos do DOM (capturados no init)
 let audio, playBtn, shuffleBtn, loopBtn, favBtn, vinylDisk, albumCover, stickerChar, progressSlider, volumeSlider;
 
 function init() {
-    // Captura elementos
     audio = document.getElementById('audioEl');
     playBtn = document.getElementById('playPauseBtn');
     shuffleBtn = document.getElementById('shuffleBtn');
@@ -374,63 +319,42 @@ function init() {
     progressSlider = document.getElementById('progressSlider');
     volumeSlider = document.getElementById('volumeSlider');
     
-    // Inicializa subsistemas
     StatsManager.load();
     BackgroundManager.init();
     LyricsManager.init();
     
-    // Configura botões principais
+    // Controles Básicos
     playBtn.onclick = togglePlay;
     document.getElementById('nextBtn').onclick = () => changeTrack(1);
     document.getElementById('prevBtn').onclick = () => changeTrack(-1);
     
+    // NOVOS CONTROLES DE PULAR 5s
+    document.getElementById('rewindBtn').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); };
+    document.getElementById('forwardBtn').onclick = () => { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); };
+    
     shuffleBtn.onclick = toggleShuffle;
     loopBtn.onclick = toggleLoop;
-    
-    favBtn.onclick = () => {
-        const t = tracks[currentIndex];
-        const isFav = StatsManager.toggleFavorite(t);
-        updateFavIcon(isFav);
-    };
+    favBtn.onclick = () => { const t = tracks[currentIndex]; const isFav = StatsManager.toggleFavorite(t); updateFavIcon(isFav); };
 
-    // Configura Stats Modal
-    document.getElementById('statsBtn').onclick = () => {
-        StatsManager.updateUI();
-        document.getElementById('statsModal').classList.add('show');
-    };
-    document.getElementById('closeStats').onclick = () => {
-        document.getElementById('statsModal').classList.remove('show');
-    };
+    // Stats Modal
+    document.getElementById('statsBtn').onclick = () => { StatsManager.updateUI(); document.getElementById('statsModal').classList.add('show'); };
+    document.getElementById('closeStats').onclick = () => { document.getElementById('statsModal').classList.remove('show'); };
     
-    // Sliders
     volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
     volumeSlider.addEventListener('change', (e) => { StatsManager.logVolume(tracks[currentIndex], e.target.value); });
 
-    progressSlider.addEventListener('input', (e) => {
-        if(audio.duration) {
-            const time = (e.target.value / 100) * audio.duration;
-            audio.currentTime = time;
-        }
-    });
+    progressSlider.addEventListener('input', (e) => { if(audio.duration) { const time = (e.target.value / 100) * audio.duration; audio.currentTime = time; } });
 
-    // Eventos de Áudio
     audio.addEventListener('timeupdate', updateProgress);
     audio.addEventListener('ended', onTrackEnded);
     audio.addEventListener('error', onAudioError);
     
-    // Renderiza a lista de músicas
     renderTrackList();
 
-    // Transição da Intro
     document.getElementById('intro').style.opacity = '0';
-    setTimeout(() => {
-        document.getElementById('intro').style.display = 'none';
-        document.getElementById('mainContent').hidden = false;
-        loadTrack(0); // Carrega a primeira música
-    }, 500);
+    setTimeout(() => { document.getElementById('intro').style.display = 'none'; document.getElementById('mainContent').hidden = false; loadTrack(0); }, 500);
 }
 
-// Expõe a função para o botão da Intro no HTML
 window.startExperience = init;
 
 function loadTrack(index) {
@@ -438,7 +362,6 @@ function loadTrack(index) {
     currentIndex = index;
     const t = tracks[index];
 
-    // Log e UI
     StatsManager.logPlay(t);
     updateFavIcon(StatsManager.isFavorite(t.id));
     BackgroundManager.setSaga(t.saga);
@@ -447,22 +370,17 @@ function loadTrack(index) {
     document.getElementById('currentTitle').textContent = `${t.index}. ${t.title}`;
     document.getElementById('currentSaga').textContent = t.saga;
     
-    // Carregamento de Arquivos
-    // OBS: Certifique-se que os arquivos estão na pasta 'Audio' e 'Covers'
     const longName = `${t.title} [${t.id}]`;
-    audio.src = `Audio/${longName}.opus`; // Tenta opus primeiro
+    audio.src = `Audio/${longName}.opus`;
     albumCover.src = `Covers/${t.id}.jpg`;
     
-    // Tema e Cores
     const theme = themeBySaga[t.saga] || themeBySaga.Troy;
     document.documentElement.style.setProperty('--accent', theme.accent);
     document.body.style.background = `radial-gradient(circle at center, ${theme.bg} 0%, #000 100%)`;
     
-    // Stickers e Lista
     handleStickers(t);
     highlightTrackInList(index);
     
-    // Reset visual
     vinylDisk.classList.remove('spinning');
     updatePlayIcon(false);
     playBtn.dataset.playing = "false";
@@ -471,20 +389,13 @@ function loadTrack(index) {
 
 function renderTrackList() {
     const grid = document.getElementById('tracksGrid');
-    grid.innerHTML = ''; // Limpa antes de renderizar
+    grid.innerHTML = '';
     tracks.forEach((t, i) => {
         const el = document.createElement('div');
         el.className = 'track';
         el.dataset.index = i;
         el.innerHTML = `<div>${t.index}. ${t.title}</div><div style="font-size:0.8rem; opacity:0.7;">${t.saga}</div>`;
-        el.onclick = () => { 
-            loadTrack(i); 
-            setTimeout(() => { 
-                audio.play(); 
-                vinylDisk.classList.add('spinning');
-                updatePlayIcon(true);
-            }, 100); 
-        };
+        el.onclick = () => { loadTrack(i); setTimeout(() => { audio.play(); vinylDisk.classList.add('spinning'); updatePlayIcon(true); }, 100); };
         grid.appendChild(el);
     });
 }
@@ -492,57 +403,32 @@ function renderTrackList() {
 function highlightTrackInList(index) {
     document.querySelectorAll('.track').forEach(d => d.classList.remove('active'));
     const item = document.querySelector(`.track[data-index="${index}"]`);
-    if(item) {
-        item.classList.add('active');
-        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+    if(item) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
 }
 
 function handleStickers(track) {
     clearInterval(stickerInterval);
     currentStickerIndex = 0;
-    
     const update = () => {
-        if(!track.stickers || track.stickers.length === 0) {
-            stickerChar.classList.add('hide'); return;
-        }
+        if(!track.stickers || track.stickers.length === 0) { stickerChar.classList.add('hide'); return; }
         const num = track.stickers[currentStickerIndex];
         const path = `Kaohto/Kaohto2023-${num}.webp`;
-        
         stickerChar.classList.add('hide');
         setTimeout(() => {
             stickerChar.src = path;
             stickerChar.onload = () => stickerChar.classList.remove('hide');
-            // Fallback para PNG se WebP não existir
-            stickerChar.onerror = () => { 
-                if(path.endsWith('.webp')) stickerChar.src = path.replace('.webp','.png'); 
-            };
+            stickerChar.onerror = () => { if(path.endsWith('.webp')) stickerChar.src = path.replace('.webp','.png'); };
         }, 300);
     };
-    
     update();
-    
     if (track.stickers && track.stickers.length > 1) {
-        stickerInterval = setInterval(() => {
-            currentStickerIndex = (currentStickerIndex + 1) % track.stickers.length;
-            update();
-        }, 8000); // Muda o sticker a cada 8 segundos
+        stickerInterval = setInterval(() => { currentStickerIndex = (currentStickerIndex + 1) % track.stickers.length; update(); }, 8000);
     }
 }
 
 function togglePlay() {
-    if (audio.paused) {
-        audio.play().then(() => {
-            vinylDisk.classList.add('spinning');
-            updatePlayIcon(true);
-            playBtn.dataset.playing = "true";
-        }).catch(err => console.error("Erro ao reproduzir:", err));
-    } else {
-        audio.pause();
-        vinylDisk.classList.remove('spinning');
-        updatePlayIcon(false);
-        playBtn.dataset.playing = "false";
-    }
+    if (audio.paused) { audio.play().then(() => { vinylDisk.classList.add('spinning'); updatePlayIcon(true); playBtn.dataset.playing = "true"; }).catch(err => console.error("Erro ao reproduzir:", err)); } 
+    else { audio.pause(); vinylDisk.classList.remove('spinning'); updatePlayIcon(false); playBtn.dataset.playing = "false"; }
 }
 
 function toggleShuffle() {
@@ -555,33 +441,16 @@ function toggleLoop() {
     isLoop = !isLoop;
     audio.loop = isLoop;
     loopBtn.style.color = isLoop ? 'var(--accent)' : '#fff';
-    // Se o loop estiver ativo, remove o evento de 'ended' que troca de música
-    if(isLoop) {
-        audio.removeEventListener('ended', onTrackEnded);
-    } else {
-        audio.addEventListener('ended', onTrackEnded);
-    }
+    if(isLoop) audio.removeEventListener('ended', onTrackEnded);
+    else audio.addEventListener('ended', onTrackEnded);
 }
 
 function changeTrack(offset) {
     let next;
-    if (offset === 1 && isShuffle) {
-        // Lógica de Shuffle
-        do { 
-            next = Math.floor(Math.random() * tracks.length); 
-        } while (next === currentIndex && tracks.length > 1);
-    } else {
-        // Sequencial
-        next = currentIndex + offset;
-        if(next >= tracks.length) next = 0;
-        if(next < 0) next = tracks.length - 1;
-    }
+    if (offset === 1 && isShuffle) { do { next = Math.floor(Math.random() * tracks.length); } while (next === currentIndex && tracks.length > 1); } 
+    else { next = currentIndex + offset; if(next >= tracks.length) next = 0; if(next < 0) next = tracks.length - 1; }
     loadTrack(next);
-    setTimeout(() => {
-        audio.play();
-        vinylDisk.classList.add('spinning');
-        updatePlayIcon(true);
-    }, 100); 
+    setTimeout(() => { audio.play(); vinylDisk.classList.add('spinning'); updatePlayIcon(true); }, 100); 
 }
 
 function updateProgress() {
@@ -590,31 +459,19 @@ function updateProgress() {
         const pct = (cur / audio.duration) * 100;
         progressSlider.value = pct;
         document.documentElement.style.setProperty('--progress-width', `${pct}%`);
-        
         document.getElementById('currentTime').textContent = formatTime(cur);
         document.getElementById('totalTime').textContent = formatTime(audio.duration);
-        
         BackgroundManager.updateAnimation(cur, audio.duration);
     }
     LyricsManager.sync(cur);
 }
 
-function onTrackEnded() {
-    if(!isLoop) changeTrack(1);
-}
+function onTrackEnded() { if(!isLoop) changeTrack(1); }
 
 function onAudioError() {
-    const t = tracks[currentIndex];
-    const src = audio.src;
+    const t = tracks[currentIndex]; const src = audio.src;
     console.warn("Erro ao carregar:", src);
-    
-    // Fallback: Se falhar .opus, tenta .mp3
-    if (src.includes(".opus")) {
-        console.log("Tentando fallback para MP3...");
-        const longName = `${t.title} [${t.id}]`;
-        audio.src = `Audio/${longName}.mp3`;
-        audio.play();
-    }
+    if (src.includes(".opus")) { const longName = `${t.title} [${t.id}]`; audio.src = `Audio/${longName}.mp3`; audio.play(); }
 }
 
 function updatePlayIcon(isPlaying) {
@@ -624,13 +481,8 @@ function updatePlayIcon(isPlaying) {
 
 function updateFavIcon(isFav) {
     const icon = favBtn.querySelector('svg');
-    if(isFav) {
-        icon.setAttribute('fill', 'currentColor');
-        favBtn.style.color = 'var(--accent)';
-    } else {
-        icon.setAttribute('fill', 'none');
-        favBtn.style.color = '#fff';
-    }
+    if(isFav) { icon.setAttribute('fill', 'currentColor'); favBtn.style.color = 'var(--accent)'; } 
+    else { icon.setAttribute('fill', 'none'); favBtn.style.color = '#fff'; }
 }
 
 function formatTime(s) {
