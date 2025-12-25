@@ -11,7 +11,6 @@
   <div id="sagaBackground">
       <svg id="saga-troy" class="constellation-svg" viewBox="0 0 500 500" style="display: none;">
           <path id="horsePath" class="constellation-path" d="M100,420 L140,350 L130,250 L180,150 L230,80 L280,100 L340,180 L330,280 L400,350 M230,80 L200,40 L260,45 L230,80" />
-          
           <circle cx="100" cy="420" r="3" class="star-point" style="animation-delay: 0s" />
           <circle cx="140" cy="350" r="4" class="star-point" style="animation-delay: 1s" />
           <circle cx="130" cy="250" r="3" class="star-point" style="animation-delay: 2s" />
@@ -24,6 +23,24 @@
           <circle cx="200" cy="40"  r="4" class="star-point" style="animation-delay: 0.8s" />
           <circle cx="260" cy="45"  r="3" class="star-point" style="animation-delay: 1.8s" />
       </svg>
+
+      <div id="saga-cyclops" style="display: none;">
+          <div class="eye-container">
+              <div class="eye-shape">
+                  <div class="eye-iris">
+                      <div class="eye-pupil"></div>
+                  </div>
+              </div>
+              <div class="eye-glow"></div>
+          </div>
+      </div>
+
+      <div id="saga-underworld" style="display: none;">
+          <div class="styx-scene">
+              <div class="styx-river"></div> <div class="styx-fog"></div>
+          </div>
+          <canvas id="underworldCanvas"></canvas> 
+      </div>
   </div>
 
   <canvas id="waterCanvas"></canvas>
