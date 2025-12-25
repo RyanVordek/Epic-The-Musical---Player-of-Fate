@@ -1,3 +1,7 @@
+{
+type: uploaded file
+fileName: style.css
+fullContent:
 :root {
   /* Paleta de Cores Base */
   --bg-base: #1a0b08;
@@ -14,26 +18,38 @@
   --progress-width: 0%;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
 
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: var(--text);
-  background: #000; /* Fundo preto para destacar a chuva */
+  background: #000;
   overflow-x: hidden;
   transition: background 1s ease;
 }
 
-/* === CANVAS DE CHUVA (Fundo) === */
+/* === FUNDOS E CAMADAS (SAGA SYSTEM) === */
+/* Container para efeitos específicos das sagas (Constelação, Ondas, etc) */
+#sagaBackground {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2; /* Atrás da chuva */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* O Canvas da chuva fica na frente do fundo da saga, mas atrás do conteúdo */
 #waterCanvas {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: -1; 
-    background: radial-gradient(circle at center, var(--bg-base) 0%, #050505 100%);
-    transition: background 1s ease;
-    opacity: 0.8; 
+    background: transparent; /* O fundo virá do sagaBackground ou body */
+    transition: opacity 1s ease;
+    opacity: 0.6; 
+    pointer-events: none;
 }
 
 .main-container { 
@@ -41,56 +57,60 @@ body {
     z-index: 10; 
     max-width: 1200px; 
     margin: 0 auto; 
-    padding-bottom: 80px; 
+    padding-bottom: 120px; /* Espaço extra para mobile */
     animation: fadeIn 1s ease; 
 }
 
-/* === VINIL REALISTA === */
+/* === VINIL REALISTA (ATUALIZADO) === */
 .vinyl-disk {
   width: 340px; height: 340px; 
   border-radius: 50%; 
   background: #101010; 
   position: relative; 
-  box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6);
   z-index: 2;
   border: 4px solid #050505;
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   animation: spin 4s linear infinite; 
   animation-play-state: paused;
+  margin: 0 auto; /* Centralizar no mobile */
 }
 .vinyl-disk.spinning { animation-play-state: running; }
 
-/* Ranhuras do disco */
+/* Ranhuras do disco (Listrinhas mais realistas) */
 .vinyl-grooves { 
-    position: absolute; inset: 6px; border-radius: 50%;
+    position: absolute; inset: 4px; border-radius: 50%;
+    /* Gradiente repetitivo fino para simular os trilhos do vinil */
     background: repeating-radial-gradient(
       #111 0, 
       #111 2px, 
-      #1a1a1a 3px, 
-      #1a1a1a 4px
+      #222 3px, 
+      #181818 4px
     );
     z-index: 1;
+    box-shadow: inset 0 0 0 5px #050505; /* Borda interna suave */
 }
 
-/* Brilho Cônico (Reflexo giratório) */
+/* Brilho Cônico (Reflexo giratório "X") */
 .vinyl-shine {
     position: absolute; inset: 0; border-radius: 50%;
     background: conic-gradient(
-        rgba(255,255,255,0) 0deg,
-        rgba(255,255,255,0.1) 70deg,
-        rgba(255,255,255,0) 100deg,
-        rgba(255,255,255,0) 180deg,
-        rgba(255,255,255,0.1) 250deg,
-        rgba(255,255,255,0) 280deg
+        from 0deg,
+        transparent 0deg,
+        rgba(255,255,255,0.15) 70deg,
+        transparent 100deg,
+        transparent 180deg,
+        rgba(255,255,255,0.15) 250deg,
+        transparent 280deg
     );
-    z-index: 2; pointer-events: none; filter: blur(3px); mix-blend-mode: overlay;
+    z-index: 2; pointer-events: none; filter: blur(8px); mix-blend-mode: overlay;
 }
 
 .vinyl-label { 
     position: absolute; inset: 0; margin: auto; 
-    width: 120px; height: 120px; 
+    width: 35%; height: 35%; /* Relativo ao tamanho do disco */
     border-radius: 50%; overflow: hidden; 
-    border: 3px solid rgba(255,255,255,0.1); 
+    border: 2px solid rgba(255,255,255,0.1); 
     background: #333; z-index: 3;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
@@ -103,25 +123,51 @@ body {
     z-index: 10; border: 2px solid #222; 
 }
 
+/* === ANIMAÇÃO DA CONSTELAÇÃO (TROY) === */
+.constellation-svg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    opacity: 0.4;
+    filter: drop-shadow(0 0 10px gold);
+}
+
+.constellation-path {
+    fill: none;
+    stroke: gold;
+    stroke-width: 2;
+    stroke-linecap: round;
+    /* O dasharray será definido via JS para a animação */
+}
+
+.star-point {
+    fill: white;
+    filter: blur(1px);
+    animation: twinkle 3s infinite ease-in-out;
+}
+
+@keyframes twinkle { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+
+
 /* === PAINEL DE LETRAS (KARAOKÊ) === */
 .lyrics-panel {
-    display: none; /* Escondido até ativar */
+    display: none; 
     margin: 15px 0;
-    height: 140px; /* Altura fixa para scroll */
+    height: 140px; 
     overflow-y: auto;
     text-align: center;
     position: relative;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4); /* Um pouco mais escuro para leitura */
     border-radius: 12px;
     cursor: pointer;
-    /* Máscara para suavizar o topo e base */
     mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
     scrollbar-width: none;
 }
 .lyrics-panel::-webkit-scrollbar { display: none; }
 
-/* Animação ao abrir */
 body.lyrics-active .lyrics-panel {
     display: block;
     animation: slideOpen 0.3s ease;
@@ -142,322 +188,177 @@ body.lyrics-active .lyrics-panel {
     cursor: pointer;
 }
 
-/* Linha ativa (Cantando agora) */
 .l-line.active {
     color: #fff;
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 800;
     opacity: 1;
     text-shadow: 0 0 15px var(--accent);
-    transform: scale(1);
+    transform: scale(1.05);
 }
 
 @keyframes slideOpen { from { height: 0; opacity: 0; margin: 0; } to { height: 140px; opacity: 1; margin: 15px 0; } }
 
-/* === NOTIFICAÇÃO DE CONQUISTA (TOAST) === */
+/* === NOTIFICAÇÃO (TOAST) E MODAL === */
+/* Mantidos iguais, apenas ajuste de z-index se precisar */
 .achievement-toast {
     position: fixed; bottom: 30px; right: 30px;
     background: rgba(20, 20, 20, 0.95);
-    border: 1px solid var(--accent);
     border-left: 5px solid var(--accent);
     color: #fff;
     padding: 15px 25px;
     border-radius: 8px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    z-index: 1000;
+    z-index: 2000;
     animation: slideInRight 0.5s ease, fadeOut 0.5s ease 3.5s forwards;
     display: flex; align-items: center; gap: 10px; font-size: 1rem;
 }
-.achievement-toast strong { color: var(--accent); text-transform: uppercase; margin-left: 5px; }
+@media (max-width: 600px) {
+    .achievement-toast { bottom: 10px; right: 10px; left: 10px; justify-content: center; }
+}
 
-@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
-
-/* === MODAL DE ESTATÍSTICAS === */
 .modal {
-    position: fixed; inset: 0; z-index: 200;
+    position: fixed; inset: 0; z-index: 2100;
     background: rgba(0,0,0,0.9);
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none; transition: opacity 0.3s;
     backdrop-filter: blur(12px);
 }
 .modal.show { opacity: 1; pointer-events: auto; }
-
 .modal-content {
     background: linear-gradient(145deg, #151515, #0a0a0a);
     padding: 40px; border-radius: 24px;
     width: 90%; max-width: 450px;
     border: 1px solid rgba(255,255,255,0.1);
     text-align: center;
-    box-shadow: 0 0 60px rgba(0,0,0,1);
     transform: scale(0.9); transition: transform 0.3s;
 }
 .modal.show .modal-content { transform: scale(1); }
+.modal h2 { color: var(--accent); margin-bottom: 30px; text-transform: uppercase; font-size: 1.4rem; }
+.stat-row { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; color: var(--muted); }
 
-.modal h2 { color: var(--accent); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; font-size: 1.4rem; }
-.stat-row { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; color: var(--muted); font-size: 0.95rem; }
-.highlight { color: #fff; font-weight: 700; text-shadow: 0 0 10px var(--accent); }
-
-/* === TELA DE INTRODUÇÃO (Centralização Fixada) === */
+/* === INTRODUÇÃO === */
 .intro { 
-    position: fixed; 
-    inset: 0; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    z-index: 100; 
+    position: fixed; inset: 0; 
+    display: flex; align-items: center; justify-content: center; 
+    z-index: 3000; 
     background: radial-gradient(circle at center, rgba(45, 27, 20, 0.4) 0%, #000 100%);
-    backdrop-filter: blur(5px); 
+    backdrop-filter: blur(10px); 
     transition: opacity 0.8s ease-out; 
 }
-
 .intro-card { 
-    padding: 60px 40px; 
-    text-align: center; 
-    max-width: 600px;
-    width: 90%;
-    
-    /* FLEXBOX: O segredo da centralização */
-    display: flex; 
-    flex-direction: column;
-    align-items: center; /* Centraliza horizontalmente */
-    justify-content: center;
-    
-    background: rgba(20, 10, 5, 0.4); 
+    padding: 60px 40px; text-align: center; width: 90%; max-width: 600px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(20, 10, 5, 0.6); 
     border: 1px solid rgba(217, 119, 6, 0.3); 
-    border-top: 1px solid rgba(217, 119, 6, 0.6); 
     border-radius: 30px; 
-    
-    box-shadow: 
-        0 20px 50px rgba(0,0,0,0.8), 
-        0 0 100px rgba(217, 119, 6, 0.1), 
-        inset 0 0 20px rgba(0,0,0,0.5);
-        
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
     animation: floatCard 6s ease-in-out infinite;
 }
-
 .intro h1 { 
-    font-size: clamp(3rem, 8vw, 5rem); 
-    margin-bottom: 10px; 
-    color: var(--accent); 
-    letter-spacing: -2px;
-    line-height: 1;
-    text-transform: uppercase;
-    
+    font-size: clamp(2.5rem, 8vw, 5rem); 
+    margin-bottom: 10px; color: var(--accent); 
+    text-transform: uppercase; line-height: 1;
     background: linear-gradient(to bottom, #fff7ed 0%, var(--accent) 70%, #7c2d12 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 20px rgba(217, 119, 6, 0.5));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-
-.intro p {
-    font-size: 1.2rem;
-    color: var(--muted);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    margin-bottom: 40px;
-    opacity: 0.8;
-}
-
-/* BOTÃO DE INÍCIO */
 .intro-btn { 
-    width: auto !important; 
-    height: auto !important;
-    min-width: 250px; 
-    
-    border-radius: 50px !important; 
-    padding: 20px 50px !important; 
-    
-    font-family: inherit;
-    font-weight: 800; 
-    font-size: 1.1rem; 
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    white-space: nowrap; 
-    
-    border: 1px solid var(--accent); 
+    border-radius: 50px !important; padding: 20px 50px !important; 
+    font-weight: 800; text-transform: uppercase;
     background: linear-gradient(180deg, rgba(217, 119, 6, 0.2) 0%, rgba(0,0,0,0.8) 100%);
-    color: #fff; 
-    cursor: pointer; 
-    
-    /* Centraliza se o flex falhar (segurança extra) */
-    margin: 30px auto 0 auto;
-    
-    box-shadow: 0 0 30px rgba(217, 119, 6, 0.2); 
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    color: #fff; margin-top: 30px; width: auto !important; height: auto !important;
 }
 
-.intro-btn:hover { 
-    transform: scale(1.05) translateY(-2px); 
-    background: var(--accent);
-    color: #000;
-    box-shadow: 0 0 60px rgba(217, 119, 6, 0.6); 
-    border-color: #fff;
+/* === LAYOUT & CONTROLES === */
+.hero { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 60px; 
+    padding: 40px; 
+    margin: 40px 20px; 
+    align-items: center; 
 }
 
-/* === UI E CONTROLES === */
+.nowplaying { padding: 30px; margin-top: 30px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+.np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.np-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+
+.timeline-container { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; }
+#progressSlider { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; background-image: linear-gradient(to right, var(--accent) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); }
+
+.controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+.main-controls { display: flex; gap: 18px; align-items: center; justify-content: center; flex: 1; }
+.volume-control { display: flex; align-items: center; gap: 10px; width: 130px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 30px; }
+
+.hero-player { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
+.player-scene { position: relative; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center; }
+
+/* Personagem Sticker */
+.character-popup { 
+    position: absolute; bottom: -30px; right: -70px; 
+    height: 300px; width: auto; 
+    filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; 
+    transition: all 0.6s; transform-origin: bottom center; 
+}
+.character-popup.hide { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-10deg); filter: blur(10px); }
+
+/* Grid de Músicas */
+.tracks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 40px; padding: 0 20px; }
+.track { padding: 18px; border-radius: 14px; background: rgba(20, 20, 20, 0.6); border: 1px solid transparent; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+.track:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+.track.active { background: var(--accent); color: #000; font-weight: 800; box-shadow: 0 0 30px var(--accent); }
+
+/* === MEDIA QUERIES (MOBILE) === */
+@media (max-width: 950px) {
+    /* Transformar o grid em coluna única */
+    .hero { 
+        display: flex; 
+        flex-direction: column; 
+        text-align: center; 
+        padding: 20px; 
+        gap: 40px; 
+        margin: 10px;
+    }
+
+    /* Ajustar o player (vinil) */
+    .hero-player { 
+        width: 100%; 
+        order: -1; /* Vinil acima dos controles */
+        transform: scale(0.9); /* Leve redução */
+    }
+    
+    .player-scene { width: 300px; height: 300px; }
+    .vinyl-disk { width: 280px; height: 280px; }
+    
+    /* Personagem menor e reposicionado no mobile */
+    .character-popup { height: 200px; right: -20px; bottom: -20px; }
+
+    /* Controles */
+    .controls-row { justify-content: center; flex-direction: column; }
+    .volume-control { width: 100%; max-width: 300px; }
+    
+    /* Título e Texto */
+    .hero-text { width: 100%; }
+    .np-title { font-size: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+    .intro h1 { font-size: 3rem; }
+    .main-controls { gap: 10px; }
+    .btn.primary { width: 60px; height: 60px; }
+    .btn.icon-btn { width: 40px; height: 40px; }
+    .intro-btn { min-width: unset; width: 100% !important; }
+}
+
+/* Utilitários Glass */
 .glass {
   background: var(--glass);
   backdrop-filter: blur(24px); 
   border: 1px solid var(--stroke);
   border-radius: var(--radius);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
-
-.btn { cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-.btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); border-color: var(--accent); }
-.icon-btn { width: 44px; height: 44px; padding: 10px; }
-.small-btn { width: 38px; height: 38px; padding: 8px; }
-.primary { background: var(--accent); border: none; color: #000; width: 72px; height: 72px; box-shadow: 0 0 30px var(--accent); }
-.primary svg { width: 32px; height: 32px; }
-
-/* Layout */
-.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; padding: 40px; margin: 40px 20px; align-items: center; }
-@media(max-width: 950px) { .hero { grid-template-columns: 1fr; text-align: center; padding: 20px; gap: 30px; } .hero-player { order: -1; } .controls-row { justify-content: center; } }
-
-.nowplaying { padding: 30px; margin-top: 30px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
-.np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.np-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); text-shadow: 0 4px 20px rgba(0,0,0,0.8); letter-spacing: -0.5px; }
-.saga-badge { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.1); }
-
-.timeline-container { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; }
-#progressSlider { flex: 1; -webkit-appearance: none; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; background-image: linear-gradient(to right, var(--progress-color) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); }
-#progressSlider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 0 15px rgba(255,255,255,0.8); transition: transform 0.1s; }
-#progressSlider:hover::-webkit-slider-thumb { transform: scale(1.4); }
-
-.controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-.main-controls { display: flex; gap: 18px; align-items: center; justify-content: center; flex: 1; }
-.volume-control { display: flex; align-items: center; gap: 10px; width: 130px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 30px; }
-#volumeSlider { width: 100%; height: 4px; accent-color: var(--accent); cursor: pointer; }
-
-.hero-player { display: flex; justify-content: center; align-items: center; perspective: 1200px; }
-.player-scene { position: relative; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center; }
-.character-popup { position: absolute; bottom: -30px; right: -70px; height: 300px; width: auto; filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; transition: all 0.6s; transform-origin: bottom center; }
-.character-popup.hide { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-10deg); filter: blur(10px); }
-
-.tracks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 40px; }
-.track { padding: 18px; border-radius: 14px; background: rgba(20, 20, 20, 0.6); border: 1px solid transparent; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-.track:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); transform: translateY(-4px); }
-.track.active { background: var(--accent); color: #000; font-weight: 800; box-shadow: 0 0 30px var(--accent); transform: scale(1.02); }
 
 @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-/* === CRÉDITOS RODAPÉ === */
-.footer {
-    text-align: center;
-    padding: 40px 0 20px;
-    color: var(--muted);
-    font-size: 0.9rem;
-    opacity: 0.7;
-}
-.credit-name {
-    color: var(--accent);
-    font-weight: bold;
-    text-transform: uppercase;
-
-  /* ===== MOBILE FIRST APPROACH ===== */
-@media (max-width: 640px) {
-  .main-container { padding: 10px; padding-bottom: 40px; }
-  .hero { grid-template-columns: 1fr; gap: 20px; padding: 15px 10px; margin: 20px 0; }
-  .vinyl-disk { width: 260px !important; height: 260px !important; }  .player-scene { width: 240px !important; height: 240px !important; }
-    .player-scene { width: 300px !important; height: 300px !important; }
-  .vinyl-label { width: 90px !important; height: 90px !important; }  .character-popup { height: 180px !important; bottom: -20px !important; right: -40px !important; }
-  .nowplaying { padding: 15px; padding-bottom: 60px; min-height: 100%; }  .np-title { font-size: 1.1rem; }
-  .tracks-grid { grid-template-columns: 1fr; }
-  .btn.icon-btn { width: 40px; height: 40px; }
-  .btn.icon-btn { width: 50px; height: 50px; }  .intro-card { padding: 30px 20px; }
-  .intro h1 { font-size: clamp(2rem, 6vw, 3rem); }
-    .btn.primary { width: 80px; height: 80px; }
-}
-
-  @media (min-width: 641px) and (max-width: 950px) {
-  .vinyl-disk { width: 280px !important; height: 280px !important; }
-  .player-scene { width: 320px !important; height: 320px !important; }
-  .tracks-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-  @media (max-height: 500px) and (orientation: landscape) {
-  .vinyl-disk { width: 180px !important; height: 180px !important; }
-  .player-scene { width: 220px !important; height: 220px !important; }
-  .character-popup { display: none; }
-}
-
-  @media (max-width: 768px) {
-  .btn.icon-btn { min-width: 44px; min-height: 44px; }
-  #progressSlider, #volumeSlider { height: 8px; }
-  #progressSlider::-webkit-slider-thumb { width: 18px; height: 18px; }
-}
-
-  @supports (padding: max(0px)) {
-  body { padding-left: max(0px, env(safe-area-inset-left)); padding-right: max(0px, env(safe-area-inset-right)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body.reduce-motion * { animation: none !important; transition: none !important; }
-}
-    letter-spacing: 1px;
-
-  /* FIX MOBILE LAYOUT DISAPPEARING */
-html {
-  height: 100%;
-  overflow-y: auto;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-}
-
-body {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-}
-
-@media (max-width: 768px) {
-  body {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .main-container {
-    min-height: auto;
-    overflow: visible;
-  }
-
-  .hero {
-    overflow: visible;
-    position: relative;
-    z-index: auto;
-  }
-
-  .vinyl-disk,
-  .player-scene,
-  .character-popup {
-    position: relative !important;
-    overflow: visible !important;
-  }
-
-  header.hero {
-    display: block !important;
-  }
-
-  .hero-text,
-  .hero-player {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 10px !important;
-  }
-
-  main.main {
-    display: block !important;
-    overflow: visible !important;
-  }
-
-  .footer {
-    position: relative !important;
-  }
-}
 }
