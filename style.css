@@ -1,7 +1,7 @@
-/* Paleta de Cores Base */
+/* === VARIÁVEIS E RESET === */
 :root {
   --bg-base: #1a0b08;
-  --accent: #d97706; /* Laranja Épico */
+  --accent: #d97706; /* Laranja Padrão - será alterado via JS */
   --text: #fff7ed;
   --muted: #a8a29e;
   
@@ -26,17 +26,15 @@ body {
 }
 
 /* === FUNDOS E CAMADAS (SAGA SYSTEM) === */
-/* Container para efeitos específicos das sagas (Constelação, Ondas, etc) */
 #sagaBackground {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    z-index: -2; /* Atrás da chuva */
-    pointer-events: none;
+    z-index: -2; /* Atrás de tudo */
+    pointer-events: none; /* Garante que não bloqueie cliques */
     overflow: hidden;
 }
 
-/* O Canvas da chuva/água fica na frente do fundo da saga */
 #waterCanvas {
     position: fixed;
     top: 0; left: 0;
@@ -46,7 +44,7 @@ body {
     transition: opacity 1s ease;
     opacity: 0.6; 
     pointer-events: none;
-    display: none; /* Controlado via JS */
+    display: none; 
 }
 
 /* === SAGA CYCLOPS: O OLHO === */
@@ -64,7 +62,7 @@ body {
 }
 
 .eye-shape {
-    width: 0; height: 0; /* Começa fechado */
+    width: 0; height: 0; 
     background: #000;
     border-radius: 50%;
     position: relative;
@@ -86,7 +84,7 @@ body {
 .eye-pupil {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 30%; height: 100%; /* Pupila de fenda */
+    width: 30%; height: 100%; 
     background: #000;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
@@ -99,23 +97,7 @@ body {
     z-index: -1;
 }
 
-@keyframes openEye {
-    0% { width: 0; height: 0; opacity: 0; }
-    50% { width: 280px; height: 10px; opacity: 1; }
-    100% { width: 280px; height: 280px; }
-}
-
-@keyframes pulseRed { 
-    0% { opacity: 0.3; transform: scale(1); } 
-    100% { opacity: 0.8; transform: scale(1.2); } 
-}
-
-@keyframes fadeInRed {
-    from { opacity: 0; background: #000; }
-    to { opacity: 1; }
-}
-
-/* === SAGA UNDERWORLD: O RIO ESTIGE 3D === */
+/* === SAGA UNDERWORLD: O RIO ESTIGE === */
 #saga-underworld {
     position: absolute; inset: 0; overflow: hidden;
     background: #050505;
@@ -145,23 +127,32 @@ body {
     opacity: 0.6;
 }
 
-.styx-fog {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-    background: linear-gradient(to top, #000 10%, transparent 100%);
-    pointer-events: none; z-index: 5;
-}
-
 #underworldCanvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 2; pointer-events: none;
 }
 
-@keyframes riverFlow {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 500px; }
+/* === TROY (CONSTELAÇÃO) === */
+.constellation-svg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%; height: 80%;
+    opacity: 0.4;
+    filter: drop-shadow(0 0 10px gold);
+    z-index: 1;
 }
 
-/* === LAYOUT PRINCIPAL === */
+.constellation-path {
+    fill: none; stroke: gold; stroke-width: 2; stroke-linecap: round;
+}
+
+.star-point {
+    fill: white; filter: blur(1px);
+    animation: twinkle 3s infinite ease-in-out;
+}
+
+/* === LAYOUT E COMPONENTES === */
 .main-container { 
     position: relative; 
     z-index: 10; 
@@ -171,7 +162,89 @@ body {
     animation: fadeIn 1s ease; 
 }
 
-/* === VINIL REALISTA === */
+/* Utilitário Glass */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(24px); 
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+}
+
+/* === PLAYER HERO SECTION === */
+.hero { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 60px; 
+    padding: 40px; 
+    margin: 40px 20px; 
+    align-items: center; 
+}
+
+.hero-text { color: #fff; width: 100%; }
+
+.nowplaying { 
+    padding: 30px; 
+    margin-top: 30px; 
+    border-radius: 20px; 
+    background: rgba(0,0,0,0.3); 
+    border: 1px solid rgba(255,255,255,0.05); 
+}
+
+.np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.np-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.saga-badge { background: var(--accent); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
+
+/* TIMELINE */
+.timeline-container { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; }
+
+#progressSlider { 
+    flex: 1; height: 6px; 
+    appearance: none; 
+    background: rgba(255,255,255,0.1); 
+    border-radius: 3px; 
+    cursor: pointer; 
+    background-image: linear-gradient(to right, var(--accent) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); 
+    background-repeat: no-repeat;
+}
+#progressSlider::-webkit-slider-thumb { appearance: none; width: 0; height: 0; } 
+
+/* CONTROLES */
+.controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+.main-controls { display: flex; gap: 15px; align-items: center; justify-content: center; flex: 1; }
+
+.btn.icon-btn { 
+    background: transparent; border: none; color: #fff; cursor: pointer; 
+    padding: 10px; border-radius: 50%; transition: 0.2s; 
+    display: flex; align-items: center; justify-content: center; 
+    width: 45px; height: 45px; 
+}
+.btn.icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
+.btn.icon-btn svg { width: 24px; height: 24px; }
+
+.btn.primary.big-play { 
+    width: 70px; height: 70px; 
+    border-radius: 50%; 
+    background: var(--accent); 
+    border: none; color: #000; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; 
+    box-shadow: 0 0 20px var(--accent); 
+    transition: 0.3s; 
+}
+.btn.primary.big-play:hover { transform: scale(1.1); background: #fff; }
+.btn.primary.big-play svg { width: 32px; height: 32px; fill: currentColor; }
+
+.volume-control { 
+    display: flex; align-items: center; gap: 10px; 
+    width: 130px; background: rgba(0,0,0,0.3); 
+    padding: 10px 15px; border-radius: 30px; 
+}
+#volumeSlider { width: 100%; height: 4px; appearance: none; background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+/* === VINIL E CENA === */
+.hero-player { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
+.player-scene { position: relative; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center; }
+
 .vinyl-disk {
   width: 340px; height: 340px; 
   border-radius: 50%; 
@@ -189,27 +262,13 @@ body {
 
 .vinyl-grooves { 
     position: absolute; inset: 4px; border-radius: 50%;
-    background: repeating-radial-gradient(
-      #111 0, 
-      #111 2px, 
-      #222 3px, 
-      #181818 4px
-    );
-    z-index: 1;
-    box-shadow: inset 0 0 0 5px #050505;
+    background: repeating-radial-gradient(#111 0, #111 2px, #222 3px, #181818 4px);
+    z-index: 1; box-shadow: inset 0 0 0 5px #050505;
 }
 
 .vinyl-shine {
     position: absolute; inset: 0; border-radius: 50%;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        rgba(255,255,255,0.15) 70deg,
-        transparent 100deg,
-        transparent 180deg,
-        rgba(255,255,255,0.15) 250deg,
-        transparent 280deg
-    );
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.15) 70deg, transparent 100deg, transparent 180deg, rgba(255,255,255,0.15) 250deg, transparent 280deg);
     z-index: 2; pointer-events: none; filter: blur(8px); mix-blend-mode: overlay;
 }
 
@@ -219,131 +278,47 @@ body {
     border-radius: 50%; overflow: hidden; 
     border: 2px solid rgba(255,255,255,0.1); 
     background: #333; z-index: 3;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
 .vinyl-label img { width: 100%; height: 100%; object-fit: cover; }
+.vinyl-hole { position: absolute; inset: 0; margin: auto; width: 12px; height: 12px; background: #000; border-radius: 50%; z-index: 10; border: 2px solid #222; }
 
-.vinyl-hole { 
-    position: absolute; inset: 0; margin: auto; 
-    width: 12px; height: 12px; 
-    background: #000; border-radius: 50%; 
-    z-index: 10; border: 2px solid #222; 
+/* PERSONAGEM POPUP */
+.character-popup { 
+    position: absolute; bottom: -30px; right: -70px; 
+    height: 300px; width: auto; 
+    filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; 
+    transition: all 0.6s; transform-origin: bottom center; 
 }
+.character-popup.hide { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-10deg); filter: blur(10px); }
 
-/* === ANIMAÇÃO DA CONSTELAÇÃO (TROY) === */
-.constellation-svg {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    height: 80%;
-    opacity: 0.4;
-    filter: drop-shadow(0 0 10px gold);
-    z-index: 1;
+/* === LISTA E LETRAS === */
+.section { padding: 20px; }
+.tracks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 0 20px; }
+
+.track { 
+    padding: 18px; 
+    border-radius: 14px; 
+    background: rgba(20, 20, 20, 0.6); 
+    border: 1px solid transparent; 
+    cursor: pointer; transition: 0.2s; 
+    display: flex; justify-content: space-between; align-items: center; 
 }
+.track:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+.track.active { background: var(--accent); color: #000; font-weight: 800; box-shadow: 0 0 30px var(--accent); }
 
-.constellation-path {
-    fill: none;
-    stroke: gold;
-    stroke-width: 2;
-    stroke-linecap: round;
-}
-
-.star-point {
-    fill: white;
-    filter: blur(1px);
-    animation: twinkle 3s infinite ease-in-out;
-}
-
-@keyframes twinkle { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
-
-
-/* === PAINEL DE LETRAS (KARAOKÊ) === */
+/* LETRAS */
 .lyrics-panel {
-    display: none; 
-    margin: 15px 0;
-    height: 140px; 
-    overflow-y: auto;
-    text-align: center;
-    position: relative;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
-    cursor: pointer;
+    display: none; margin: 15px 0; height: 140px; 
+    overflow-y: auto; text-align: center; position: relative;
+    background: rgba(0, 0, 0, 0.4); border-radius: 12px;
     mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
     scrollbar-width: none;
 }
-.lyrics-panel::-webkit-scrollbar { display: none; }
+body.lyrics-active .lyrics-panel { display: block; animation: slideOpen 0.3s ease; }
+.l-line { padding: 6px; color: var(--muted); opacity: 0.5; transition: 0.3s; }
+.l-line.active { color: #fff; font-size: 1.1rem; opacity: 1; font-weight: bold; text-shadow: 0 0 10px var(--accent); transform: scale(1.05); }
 
-body.lyrics-active .lyrics-panel {
-    display: block;
-    animation: slideOpen 0.3s ease;
-}
-
-.lyrics-placeholder {
-    padding-top: 60px; color: var(--muted); font-size: 0.9rem; font-style: italic; opacity: 0.7;
-}
-
-.l-line {
-    color: var(--muted);
-    font-size: 0.95rem;
-    padding: 6px 10px;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    opacity: 0.5;
-    transform: scale(0.98);
-    line-height: 1.4;
-    cursor: pointer;
-}
-
-.l-line.active {
-    color: #fff;
-    font-size: 1.2rem;
-    font-weight: 800;
-    opacity: 1;
-    text-shadow: 0 0 15px var(--accent);
-    transform: scale(1.05);
-}
-
-@keyframes slideOpen { from { height: 0; opacity: 0; margin: 0; } to { height: 140px; opacity: 1; margin: 15px 0; } }
-
-/* === NOTIFICAÇÃO (TOAST) E MODAL === */
-.achievement-toast {
-    position: fixed; bottom: 30px; right: 30px;
-    background: rgba(20, 20, 20, 0.95);
-    border-left: 5px solid var(--accent);
-    color: #fff;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    z-index: 2000;
-    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 3.5s forwards;
-    display: flex; align-items: center; gap: 10px; font-size: 1rem;
-}
-@media (max-width: 600px) {
-    .achievement-toast { bottom: 10px; right: 10px; left: 10px; justify-content: center; }
-}
-
-.modal {
-    position: fixed; inset: 0; z-index: 2100;
-    background: rgba(0,0,0,0.9);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-    backdrop-filter: blur(12px);
-}
-.modal.show { opacity: 1; pointer-events: auto; }
-.modal-content {
-    background: linear-gradient(145deg, #151515, #0a0a0a);
-    padding: 40px; border-radius: 24px;
-    width: 90%; max-width: 450px;
-    border: 1px solid rgba(255,255,255,0.1);
-    text-align: center;
-    transform: scale(0.9); transition: transform 0.3s;
-}
-.modal.show .modal-content { transform: scale(1); }
-.modal h2 { color: var(--accent); margin-bottom: 30px; text-transform: uppercase; font-size: 1.4rem; }
-.stat-row { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; color: var(--muted); }
-
-/* === INTRODUÇÃO === */
+/* === INTRO E MODAIS === */
 .intro { 
     position: fixed; inset: 0; 
     display: flex; align-items: center; justify-content: center; 
@@ -355,110 +330,61 @@ body.lyrics-active .lyrics-panel {
 .intro-card { 
     padding: 60px 40px; text-align: center; width: 90%; max-width: 600px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(20, 10, 5, 0.6); 
-    border: 1px solid rgba(217, 119, 6, 0.3); 
-    border-radius: 30px; 
     box-shadow: 0 20px 50px rgba(0,0,0,0.8);
     animation: floatCard 6s ease-in-out infinite;
 }
 .intro h1 { 
-    font-size: clamp(2.5rem, 8vw, 5rem); 
-    margin-bottom: 10px; color: var(--accent); 
+    font-size: clamp(2.5rem, 8vw, 5rem); margin-bottom: 10px; color: var(--accent); 
     text-transform: uppercase; line-height: 1;
     background: linear-gradient(to bottom, #fff7ed 0%, var(--accent) 70%, #7c2d12 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .intro-btn { 
-    border-radius: 50px !important; padding: 20px 50px !important; 
-    font-weight: 800; text-transform: uppercase;
+    border-radius: 50px; padding: 20px 50px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none;
     background: linear-gradient(180deg, rgba(217, 119, 6, 0.2) 0%, rgba(0,0,0,0.8) 100%);
-    color: #fff; margin-top: 30px; width: auto !important; height: auto !important;
+    color: #fff; margin-top: 30px; width: auto; font-size: 1.1rem; transition: 0.3s;
+}
+.intro-btn:hover { transform: scale(1.05); background: var(--accent); color: #000; }
+
+.modal { 
+    position: fixed; inset: 0; z-index: 2100; 
+    background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; 
+    opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(5px); 
+}
+.modal.show { opacity: 1; pointer-events: auto; }
+.modal-content { 
+    background: #151515; padding: 40px; border-radius: 24px; 
+    width: 90%; max-width: 450px; border: 1px solid #333; text-align: center; 
+}
+.stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; color: #aaa; }
+.highlight { color: #fff; font-weight: bold; }
+.achievement-toast { 
+    position: fixed; bottom: 30px; right: 30px; 
+    background: #222; border-left: 5px solid var(--accent); color: #fff; 
+    padding: 15px 25px; border-radius: 8px; z-index: 2000; 
+    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 3.5s forwards; 
 }
 
-/* === LAYOUT & CONTROLES === */
-.hero { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 60px; 
-    padding: 40px; 
-    margin: 40px 20px; 
-    align-items: center; 
-}
-
-.nowplaying { padding: 30px; margin-top: 30px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
-.np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.np-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
-
-.timeline-container { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; }
-#progressSlider { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer; background-image: linear-gradient(to right, var(--accent) var(--progress-width), rgba(255,255,255,0.1) var(--progress-width)); }
-
-.controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-.main-controls { display: flex; gap: 18px; align-items: center; justify-content: center; flex: 1; }
-.volume-control { display: flex; align-items: center; gap: 10px; width: 130px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 30px; }
-
-.hero-player { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
-.player-scene { position: relative; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center; }
-
-/* Personagem Sticker */
-.character-popup { 
-    position: absolute; bottom: -30px; right: -70px; 
-    height: 300px; width: auto; 
-    filter: drop-shadow(10px 10px 30px rgba(0,0,0,0.8)); z-index: 5; 
-    transition: all 0.6s; transform-origin: bottom center; 
-}
-.character-popup.hide { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-10deg); filter: blur(10px); }
-
-/* Grid de Músicas */
-.tracks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 40px; padding: 0 20px; }
-.track { padding: 18px; border-radius: 14px; background: rgba(20, 20, 20, 0.6); border: 1px solid transparent; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-.track:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
-.track.active { background: var(--accent); color: #000; font-weight: 800; box-shadow: 0 0 30px var(--accent); }
-
-/* === MEDIA QUERIES (MOBILE) === */
-@media (max-width: 950px) {
-    .hero { 
-        display: flex; 
-        flex-direction: column; 
-        text-align: center; 
-        padding: 20px; 
-        gap: 40px; 
-        margin: 10px;
-    }
-
-    .hero-player { 
-        width: 100%; 
-        order: -1; 
-        transform: scale(0.9); 
-    }
-    
-    .player-scene { width: 300px; height: 300px; }
-    .vinyl-disk { width: 280px; height: 280px; }
-    
-    .character-popup { height: 200px; right: -20px; bottom: -20px; }
-
-    .controls-row { justify-content: center; flex-direction: column; }
-    .volume-control { width: 100%; max-width: 300px; }
-    
-    .hero-text { width: 100%; }
-    .np-title { font-size: 1.2rem; }
-}
-
-@media (max-width: 480px) {
-    .intro h1 { font-size: 3rem; }
-    .main-controls { gap: 10px; }
-    .btn.primary { width: 60px; height: 60px; }
-    .btn.icon-btn { width: 40px; height: 40px; }
-    .intro-btn { min-width: unset; width: 100% !important; }
-}
-
-/* Utilitários Glass */
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(24px); 
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-}
-
-@keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+/* === ANIMAÇÕES === */
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideOpen { from { height: 0; opacity: 0; } to { height: 140px; opacity: 1; } }
+@keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes openEye { 0% { width: 0; height: 0; opacity: 0; } 50% { width: 280px; height: 10px; opacity: 1; } 100% { width: 280px; height: 280px; } }
+@keyframes pulseRed { 0% { opacity: 0.3; transform: scale(1); } 100% { opacity: 0.8; transform: scale(1.2); } }
+@keyframes fadeInRed { from { opacity: 0; background: #000; } to { opacity: 1; } }
+@keyframes riverFlow { 0% { background-position: 0 0; } 100% { background-position: 0 500px; } }
+@keyframes twinkle { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
+
+/* === MOBILE === */
+@media (max-width: 950px) {
+    .hero { display: flex; flex-direction: column; text-align: center; gap: 40px; padding: 20px; margin: 10px; }
+    .hero-player { order: -1; transform: scale(0.9); }
+    .player-scene { width: 300px; height: 300px; }
+    .vinyl-disk { width: 280px; height: 280px; }
+    .character-popup { height: 200px; right: -20px; bottom: -20px; }
+    .controls-row { justify-content: center; flex-direction: column; }
+    .volume-control { width: 100%; max-width: 300px; }
+}
