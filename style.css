@@ -400,4 +400,66 @@ body.lyrics-active .lyrics-panel {
   body.reduce-motion * { animation: none !important; transition: none !important; }
 }
     letter-spacing: 1px;
+
+  /* FIX MOBILE LAYOUT DISAPPEARING */
+html {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-container {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .hero {
+    overflow: visible;
+    position: relative;
+    z-index: auto;
+  }
+
+  .vinyl-disk,
+  .player-scene,
+  .character-popup {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  header.hero {
+    display: block !important;
+  }
+
+  .hero-text,
+  .hero-player {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+
+  main.main {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .footer {
+    position: relative !important;
+  }
+}
 }
