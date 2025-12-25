@@ -1,5 +1,26 @@
 /* ========= EPIC Player - Ultimate Edition (Final Logic) ========== */
 
+
+const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};
+
+const isTouchDevice = () => {
+  return (
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    (navigator.msMaxTouchPoints > 0)
+  );
+};
+
+// Inicializar altura viewport
+window.addEventListener('orientationchange', () => {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+});
+
 // --- CONFIGURAÇÃO DE TEMAS ---
 const themeBySaga = {
     Troy:       { bg: "#2d1b14", accent: "#fbbf24" },
