@@ -1,7 +1,3 @@
-{
-type: uploaded file
-fileName: player.js
-fullContent:
 /* ========= EPIC Player - Ultimate Edition (Mobile & Sagas) ========== */
 
 // --- CONFIGURAÇÃO DE TEMAS ---
