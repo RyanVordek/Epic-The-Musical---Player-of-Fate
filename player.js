@@ -1,25 +1,8 @@
-/* ========= EPIC Player - Ultimate Edition (Final Logic) ========== */
-
-
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-};
-
-const isTouchDevice = () => {
-  return (
-    ('ontouchstart' in window) ||
-    (navigator.maxTouchPoints > 0) ||
-    (navigator.msMaxTouchPoints > 0)
-  );
-};
-
-// Inicializar altura viewport
-window.addEventListener('orientationchange', () => {
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-});
+{
+type: uploaded file
+fileName: player.js
+fullContent:
+/* ========= EPIC Player - Ultimate Edition (Mobile & Sagas) ========== */
 
 // --- CONFIGURAÇÃO DE TEMAS ---
 const themeBySaga = {
@@ -129,34 +112,31 @@ const StatsManager = {
         this.save();
     },
 
+    logVolume(track, vol) {
+        this.checkAchievements(track, vol);
+    },
+
     toggleFavorite(track) {
         const id = track.id;
         const key = 'fav_' + id;
         const isFav = !(localStorage.getItem(key) === 'true');
-        
         localStorage.setItem(key, isFav);
-        
         if (isFav) this.data.favCount++;
         else this.data.favCount--;
-        
         this.checkAchievements(track);
         this.save();
         return isFav;
     },
 
-    isFavorite(id) {
-        return localStorage.getItem('fav_' + id) === 'true';
-    },
+    isFavorite(id) { return localStorage.getItem('fav_' + id) === 'true'; },
 
     updateUI() {
         let mostPlayed = { id: null, count: 0 };
         for(let id in this.data.plays) {
             if(this.data.plays[id] > mostPlayed.count) mostPlayed = { id, count: this.data.plays[id] };
         }
-        
         const track = tracks.find(t => t.id === mostPlayed.id);
         const mostPlayedText = track ? `${track.title} (${mostPlayed.count}x)` : "Nenhuma";
-        
         document.getElementById('statMostPlayed').textContent = mostPlayedText;
         document.getElementById('statTotalPlays').textContent = this.data.totalPlays;
         document.getElementById('statBadges').textContent = `${this.data.achievements.length} Desbloqueadas`;
@@ -164,7 +144,72 @@ const StatsManager = {
 };
 
 /* =================================================================
-   2. EFEITO DE CHUVA OTIMIZADO
+   2. GERENCIADOR DE FUNDOS (EFEITOS VISUAIS)
+   ================================================================= */
+const BackgroundManager = {
+    currentSaga: null,
+    waterRenderer: null,
+    
+    init() {
+        this.waterRenderer = new RippleRenderer();
+        this.troySvg = document.getElementById('saga-troy');
+        this.troyPath = document.getElementById('horsePath');
+        
+        // Preparar caminho SVG de Troia
+        if(this.troyPath) {
+            this.pathLength = this.troyPath.getTotalLength();
+            this.troyPath.style.strokeDasharray = this.pathLength;
+            this.troyPath.style.strokeDashoffset = this.pathLength;
+        }
+    },
+    
+    setSaga(sagaName) {
+        this.currentSaga = sagaName;
+        
+        // 1. Resetar tudo
+        if(this.waterRenderer) this.waterRenderer.active = false;
+        if(this.troySvg) this.troySvg.style.display = 'none';
+        document.getElementById('waterCanvas').style.display = 'none';
+        
+        // 2. Ativar Específico
+        switch(sagaName) {
+            case 'Troy':
+                if(this.troySvg) {
+                    this.troySvg.style.display = 'block';
+                    // Resetar animação
+                    this.troyPath.style.strokeDashoffset = this.pathLength;
+                }
+                break;
+                
+            case 'Ocean':
+            case 'Cyclops':
+            case 'Vengeance': // Adicionado Vengeance para água também
+                if(this.waterRenderer) {
+                    this.waterRenderer.active = true;
+                    document.getElementById('waterCanvas').style.display = 'block';
+                }
+                break;
+                
+            default:
+                // Sagas sem efeito especial usam apenas a cor de fundo do CSS
+                break;
+        }
+    },
+    
+    updateAnimation(currentTime, duration) {
+        if (!duration) return;
+        const progress = currentTime / duration;
+        
+        // Animação Troia: Desenhar constelação
+        if (this.currentSaga === 'Troy' && this.troyPath) {
+            const drawLength = this.pathLength * progress;
+            this.troyPath.style.strokeDashoffset = this.pathLength - drawLength;
+        }
+    }
+};
+
+/* =================================================================
+   3. EFEITO DE ÁGUA (OTIMIZADO)
    ================================================================= */
 class RippleRenderer {
     constructor() {
@@ -173,17 +218,17 @@ class RippleRenderer {
         this.ripples = [];
         this.width = window.innerWidth;
         this.height = window.innerHeight;
+        this.active = false;
         
         this.resize();
         window.addEventListener('resize', () => this.resize());
-        window.addEventListener('mousedown', (e) => this.addRipple(e.clientX, e.clientY));
         
-        // CORREÇÃO: Pausa quando a aba não está visível
+        // Criar gotas aleatórias
         setInterval(() => {
-            if (!document.hidden) {
+            if (this.active && !document.hidden) {
                 this.addRipple(Math.random()*this.width, Math.random()*this.height);
             }
-        }, 300);
+        }, 400); // Menos frequente para economizar mobile
         
         this.loop();
     }
@@ -200,18 +245,21 @@ class RippleRenderer {
     }
     
     loop() {
-        // Se a aba estiver escondida, não desenha (economiza recursos)
-        if (document.hidden) {
+        if (!this.active || document.hidden) {
             requestAnimationFrame(() => this.loop());
             return;
         }
 
         this.ctx.clearRect(0,0, this.width, this.height);
         
+        // Cor da água baseada na saga (levemente azulada)
+        this.ctx.fillStyle = "rgba(8, 47, 73, 0.1)"; 
+        this.ctx.fillRect(0,0, this.width, this.height);
+        
         for(let i=0; i<this.ripples.length; i++) {
             let r = this.ripples[i];
             r.age++;
-            r.size += 2; 
+            r.size += 1.5; 
             r.power -= 0.01;
             
             if(r.power <= 0) {
@@ -222,24 +270,16 @@ class RippleRenderer {
             
             this.ctx.beginPath();
             this.ctx.ellipse(r.x, r.y, r.size, r.size * 0.5, 0, 0, Math.PI * 2);
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeStyle = `rgba(255, 255, 255, ${r.power * 0.5})`;
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = `rgba(100, 200, 255, ${r.power * 0.4})`;
             this.ctx.stroke();
-            
-            if(r.age > 5) {
-                 this.ctx.beginPath();
-                 this.ctx.ellipse(r.x, r.y, Math.max(0, r.size - 10), Math.max(0, (r.size - 10) * 0.5), 0, 0, Math.PI * 2);
-                 this.ctx.lineWidth = 1;
-                 this.ctx.strokeStyle = `rgba(255, 255, 255, ${r.power * 0.2})`;
-                 this.ctx.stroke();
-            }
         }
         requestAnimationFrame(() => this.loop());
     }
 }
 
 /* =================================================================
-   3. GERENCIADOR DE LETRAS (UX MELHORADO)
+   4. GERENCIADOR DE LETRAS
    ================================================================= */
 const LyricsManager = {
     isEnabled: false,
@@ -248,16 +288,8 @@ const LyricsManager = {
     init() {
         this.content = document.getElementById('lyricsContent');
         this.btn = document.getElementById('lyricsBtn');
-        
-        // Botão de abrir/fechar
         if(this.btn) this.btn.onclick = () => this.toggle();
-        
-        // CORREÇÃO: Clicar no texto da letra também fecha o painel
-        if(this.content) {
-            this.content.onclick = () => {
-                if(this.isEnabled) this.toggle();
-            };
-        }
+        if(this.content) this.content.onclick = () => { if(this.isEnabled) this.toggle(); };
     },
     
     toggle() {
@@ -306,7 +338,7 @@ const LyricsManager = {
 };
 
 /* =================================================================
-   4. PLAYER LOGIC (CORE)
+   5. PLAYER CORE
    ================================================================= */
 let currentIndex = 0;
 let stickerInterval = null;
@@ -325,7 +357,7 @@ const volumeSlider = document.getElementById('volumeSlider');
 
 function init() {
     StatsManager.load();
-    new RippleRenderer();
+    BackgroundManager.init();
     LyricsManager.init();
     
     document.getElementById('intro').style.opacity = '0';
@@ -360,6 +392,7 @@ function loadTrack(index) {
 
     StatsManager.logPlay(t);
     updateFavIcon(StatsManager.isFavorite(t.id));
+    BackgroundManager.setSaga(t.saga); // Ativar fundo da saga
 
     document.getElementById('currentTitle').textContent = `${t.index}. ${t.title}`;
     document.getElementById('currentSaga').textContent = t.saga;
@@ -367,31 +400,37 @@ function loadTrack(index) {
     LyricsManager.load(t.id);
 
     const longName = `${t.title} [${t.id}]`;
-    console.log(`Carregando: ${longName}`);
     audio.src = `Audio/${longName}.opus`;
-    
     albumCover.src = `Covers/${t.id}.jpg`;
     
+    // Tema de Cores
     const theme = themeBySaga[t.saga] || themeBySaga.Troy;
     document.documentElement.style.setProperty('--accent', theme.accent);
+    // Mudança suave de cor de fundo
+    document.body.style.background = `radial-gradient(circle at center, ${theme.bg} 0%, #000 100%)`;
     
     handleStickers(t);
 
     document.querySelectorAll('.track').forEach(d => d.classList.remove('active'));
     const item = document.querySelector(`.track[data-index="${index}"]`);
-    if(item) item.classList.add('active');
+    if(item) {
+        item.classList.add('active');
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
     
     vinylDisk.classList.remove('spinning');
     updatePlayIcon(false);
     progressSlider.value = 0;
+}
+
+audio.addEventListener('error', (e) => {
     const t = tracks[currentIndex];
     const src = audio.src;
+    // Fallback simples para MP3 se OPUS falhar
     if (src.includes(".opus")) {
         const longName = `${t.title} [${t.id}]`;
         audio.src = `Audio/${longName}.mp3`;
         if(playBtn.dataset.playing === "true") audio.play();
-    } else if (src.includes(".mp3")) {
-         audio.src = `Audio/${t.id}.opus`;
     }
 });
 
@@ -409,7 +448,7 @@ function handleStickers(track) {
             stickerChar.src = path;
             stickerChar.onload = () => stickerChar.classList.remove('hide');
             stickerChar.onerror = () => { if(path.endsWith('.webp')) stickerChar.src = path.replace('.webp','.png'); }
-        }, 500);
+        }, 300);
     };
     update();
     if (track.stickers && track.stickers.length > 1) {
@@ -440,16 +479,10 @@ function toggleShuffle() {
     if (isShuffle) {
         shuffleBtn.style.color = 'var(--accent)';
         shuffleBtn.style.background = 'rgba(255,255,255,0.1)';
-        shuffleBtn.querySelector('svg').setAttribute('stroke-width', '3');
     } else {
         shuffleBtn.style.color = '#fff';
         shuffleBtn.style.background = 'transparent';
-        shuffleBtn.querySelector('svg').setAttribute('stroke-width', '2');
     }
-  // Update Media Session play state
-  if (window.updateMediaSessionPlayState) {
-    window.updateMediaSessionPlayState(!audio.paused);
-  }
 }
 
 function updatePlayIcon(isPlaying) {
@@ -496,6 +529,9 @@ audio.addEventListener('timeupdate', () => {
         document.documentElement.style.setProperty('--progress-width', `${pct}%`);
         document.getElementById('currentTime').textContent = formatTime(cur);
         document.getElementById('totalTime').textContent = formatTime(audio.duration);
+        
+        // Atualizar Animação da Saga
+        BackgroundManager.updateAnimation(cur, audio.duration);
     }
     LyricsManager.sync(cur);
 });
@@ -526,4 +562,5 @@ function formatTime(s) {
     const m = Math.floor(s/60);
     const sec = Math.floor(s%60);
     return `${m}:${sec<10?'0'+sec:sec}`;
+}
 }
