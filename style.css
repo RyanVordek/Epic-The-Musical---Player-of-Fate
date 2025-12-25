@@ -361,17 +361,16 @@ body.lyrics-active .lyrics-panel {
 @media (max-width: 640px) {
   .main-container { padding: 10px; padding-bottom: 40px; }
   .hero { grid-template-columns: 1fr; gap: 20px; padding: 15px 10px; margin: 20px 0; }
-  .vinyl-disk { width: 200px !important; height: 200px !important; }
-  .player-scene { width: 240px !important; height: 240px !important; }
-  .vinyl-label { width: 70px !important; height: 70px !important; }
-  .character-popup { height: 180px !important; bottom: -20px !important; right: -40px !important; }
+  .vinyl-disk { width: 260px !important; height: 260px !important; }  .player-scene { width: 240px !important; height: 240px !important; }
+    .player-scene { width: 300px !important; height: 300px !important; }
+  .vinyl-label { width: 90px !important; height: 90px !important; }  .character-popup { height: 180px !important; bottom: -20px !important; right: -40px !important; }
   .nowplaying { padding: 15px; }
   .np-title { font-size: 1.1rem; }
   .tracks-grid { grid-template-columns: 1fr; }
   .btn.icon-btn { width: 40px; height: 40px; }
-  .btn.primary { width: 60px; height: 60px; }
-  .intro-card { padding: 30px 20px; }
+  .btn.icon-btn { width: 50px; height: 50px; }  .intro-card { padding: 30px 20px; }
   .intro h1 { font-size: clamp(2rem, 6vw, 3rem); }
+    .btn.primary { width: 80px; height: 80px; }
 }
 
   @media (min-width: 641px) and (max-width: 950px) {
