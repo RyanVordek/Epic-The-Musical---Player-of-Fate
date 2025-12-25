@@ -8,6 +8,8 @@ class MobileOptimizer {
     this.isMobile = this.detectMobile();
     this.isTouch = this.detectTouch();
     this.init();
+          this.preventLazyLoad();
+      this.fixLayoutVisibility();
   }
 
   detectMobile() {
@@ -80,6 +82,33 @@ class MobileOptimizer {
       }, 100);
     });
   }
+  preventLazyLoad() {
+    // Força carregamento de imagens visíveis em mobile
+    if ('loading' in HTMLImageElement.prototype) {
+      document.querySelectorAll('img').forEach(img => {
+        if (img.loading === 'lazy') {
+          img.loading = 'eager';
+        }
+      });
+    }
+  }
+
+  fixLayoutVisibility() {
+    // Garante que o layout não desapareça
+    const mainContainer = document.getElementById('mainContent');
+    const intro = document.getElementById('intro');
+    
+    if (mainContainer) {
+      mainContainer.style.display = 'block !important';
+      mainContainer.style.visibility = 'visible';
+      mainContainer.style.opacity = '1';
+    }
+    
+    if (intro) {
+      intro.style.display = 'flex';
+    }
+  }
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
