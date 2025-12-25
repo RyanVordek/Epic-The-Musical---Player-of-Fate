@@ -1,15 +1,35 @@
+{
+type: uploaded file
+fileName: index.html
+fullContent:
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />  <title>EPIC Player - The Player Edition</title>
-   <meta name="apple-mobile-web-app-capable" content="yes" />
-   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-   <meta name="theme-color" content="#1a0b08" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPIC Player - The Player Edition</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   
+  <div id="sagaBackground">
+      <svg id="saga-troy" class="constellation-svg" viewBox="0 0 500 500" style="display: none;">
+          <path id="horsePath" class="constellation-path" d="M100,420 L140,350 L130,250 L180,150 L230,80 L280,100 L340,180 L330,280 L400,350 M230,80 L200,40 L260,45 L230,80" />
+          
+          <circle cx="100" cy="420" r="3" class="star-point" style="animation-delay: 0s" />
+          <circle cx="140" cy="350" r="4" class="star-point" style="animation-delay: 1s" />
+          <circle cx="130" cy="250" r="3" class="star-point" style="animation-delay: 2s" />
+          <circle cx="180" cy="150" r="5" class="star-point" style="animation-delay: 0.5s" />
+          <circle cx="230" cy="80"  r="4" class="star-point" style="animation-delay: 1.5s" />
+          <circle cx="280" cy="100" r="3" class="star-point" style="animation-delay: 2.5s" />
+          <circle cx="340" cy="180" r="4" class="star-point" style="animation-delay: 0.2s" />
+          <circle cx="330" cy="280" r="3" class="star-point" style="animation-delay: 1.2s" />
+          <circle cx="400" cy="350" r="3" class="star-point" style="animation-delay: 2.2s" />
+          <circle cx="200" cy="40"  r="4" class="star-point" style="animation-delay: 0.8s" />
+          <circle cx="260" cy="45"  r="3" class="star-point" style="animation-delay: 1.8s" />
+      </svg>
+  </div>
+
   <canvas id="waterCanvas"></canvas>
 
   <div id="statsModal" class="modal">
@@ -79,13 +99,16 @@
                 <button class="btn icon-btn" id="shuffleBtn" title="Aleatório"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg></button>
                 <button class="btn icon-btn" id="prevBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg></button>
                 <button class="btn icon-btn" id="rewindBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg></button>
+                
                 <button class="btn primary big-play" id="playPauseBtn">
                     <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
                 </button>
+                
                 <button class="btn icon-btn" id="forwardBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg></button>
                 <button class="btn icon-btn" id="nextBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg></button>
             </div>
+            
             <div class="volume-control">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1">
@@ -131,7 +154,6 @@
   <audio id="audioEl" preload="metadata"></audio>
   <script src="lyrics.js"></script> 
   <script src="player.js"></script>
-  <script src="media-session.js"></script>
-   <script src="mobile-optimizations.js"></script>
 </body>
 </html>
+}
